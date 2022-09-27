@@ -1,6 +1,9 @@
 # macOS system files
 .DS_Store
 
+# manuscript files
+/manuscript/
+
 # History files
 .Rhistory
 .Rapp.history
