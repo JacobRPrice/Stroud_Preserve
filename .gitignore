@@ -4,6 +4,9 @@
 # manuscript files
 /manuscript/
 
+# development/test scripts
+*/dev/
+
 # History files
 .Rhistory
 .Rapp.history
