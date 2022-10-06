@@ -62,6 +62,25 @@ treats$Cover_Crop <- factor(
   levels = c("No Cover Crop", "Cover Crop")
 )
 
+# factor interaction term
+treats$Treatment_Group <- with(
+  treats, 
+  interaction(
+    treats$Management_System, treats$Cover_Crop, treats$Tillage,
+    drop = TRUE, 
+    lex.order = TRUE
+  )
+)
+levels(treats$Treatment_Group)
+levels(treats$Treatment_Group) <- c(
+  "Con_NC_T", 
+  "Con_CC_T", 
+  "Con_CC_RT", 
+  "Org_CC_T", 
+  "Org_CC_RT"
+)
+levels(treats$Treatment_Group)
+
 str(treats)
 
 # Create scaffold for data ------------------------------------------------
@@ -77,7 +96,7 @@ dat <- left_join(
 dat <- unique(
   subset(
     dat, 
-    select = c(Date, Site, Management_System, Tillage, Cover_Crop)
+    select = c(Date, Site, Management_System, Tillage, Cover_Crop, Treatment_Group)
   )
 )
 
@@ -303,13 +322,13 @@ dat <- full_join(
 
 # save to disk ------------------------------------------------------------
 # as .csv
-# write.csv(
-#   x = dat,
-#   file = file.path(getwd(), "data", "dat.csv"),
-#   row.names = FALSE
-# )
+write.csv(
+  x = dat,
+  file = file.path(getwd(), "data", "dat.csv"),
+  row.names = FALSE
+)
 # as RDS
-# saveRDS(
-#   object = dat,
-#   file = file.path(getwd(), "/data/", "dat.RDS")
-# )
+saveRDS(
+  object = dat,
+  file = file.path(getwd(), "/data/", "dat.RDS")
+)
