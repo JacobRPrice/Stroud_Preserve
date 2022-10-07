@@ -30,7 +30,11 @@ samples_summary <- dat_long %>% group_by(Date, Parameter) %>%  summarise(
 )
 
 # condense info from each dataset into a single variable for clarity. 
+<<<<<<< HEAD
 samples_summary$Soil_Samples <- 
+=======
+samples_summary$Nit_Denit_Samples <- 
+>>>>>>> 2149be8aa0fd60d327b1073a112ca64d4fdc0b29
   ifelse(samples_summary$netMIN > 0, samples_summary$netMIN, 0)
 samples_summary$EEA_Samples <- 
   ifelse(samples_summary$GLU_gOM > 0, samples_summary$GLU_gOM, 0)

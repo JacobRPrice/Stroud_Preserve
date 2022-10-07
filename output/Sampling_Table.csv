@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 "Date","AOA","AOB","GLU_gOM","GLU_gSoil","Moisture_percent","NAG_gOM","NAG_gSoil","netMIN","netNIT","NH4Nstock","NO3Nstock","nosZ","OM_percent","PHO_gOM","PHO_gSoil","Soil_Samples","EEA_Samples","qPCR_Samples"
+=======
+"Date","AOA","AOB","GLU_gOM","GLU_gSoil","Moisture_percent","NAG_gOM","NAG_gSoil","netMIN","netNIT","NH4Nstock","NO3Nstock","nosZ","OM_percent","PHO_gOM","PHO_gSoil","Nit_Denit_Samples","EEA_Samples","qPCR_Samples"
+>>>>>>> 2149be8aa0fd60d327b1073a112ca64d4fdc0b29
 2020-03-04,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8
 2020-05-05,0,0,8,8,8,8,8,8,8,8,8,0,8,8,8,8,8,0
 2020-06-03,0,0,8,8,8,8,8,8,8,8,8,0,8,8,8,8,8,0
