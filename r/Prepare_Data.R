@@ -320,6 +320,20 @@ dat <- full_join(
   by = c("Site", "Date")
 )
 
+# Make nicer names --------------------------------------------------------
+str(dat)
+
+dat <- rename(
+  dat, 
+  nosZ = NosZ,
+  GLU_gSoil = EEA_umol_hr_gdrysoil_GLU, 
+  NAG_gSoil = EEA_umol_hr_gdrysoil_NAG, 
+  PHO_gSoil = EEA_umol_hr_gdrysoil_PHO, 
+  GLU_gOM = EEA_umol_hr_gOM_GLU, 
+  NAG_gOM = EEA_umol_hr_gOM_NAG, 
+  PHO_gOM = EEA_umol_hr_gOM_PHO
+)
+
 # save to disk ------------------------------------------------------------
 # as .csv
 write.csv(
