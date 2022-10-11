@@ -192,12 +192,18 @@ rm(samplemass_g)
 qpcr$Date <- sampledata$Date[match(qpcr$SWRC_ID, sampledata$SWRC_ID)]
 qpcr$Site <- sampledata$Site[match(qpcr$SWRC_ID, sampledata$SWRC_ID)]
 
+# The sample from OT_11 on 9/15/21 did not amplify well. 
+qpcr[which(is.na(qpcr$gene_copies_per_g_soil)),]
+
 # take the mean of each sample's (triplicate) analytical replicates
 str(qpcr)
 qpcr <- qpcr %>% group_by(Target, Date, Site) %>% dplyr::summarise(
   copy_number = mean(gene_copies_per_g_soil)
 ) %>% ungroup()
 str(qpcr)
+
+# Confirm OT_11 on 9/15/21 resulted in NA's 
+qpcr[which(is.na(qpcr$copy_number)),]
 
 # qPCR: append ------------------------------------------------------------
 str(dat)
