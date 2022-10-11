@@ -224,7 +224,7 @@ str(dat)
 
 # Soil --------------------------------------------------------------------
 soil <- read.csv(
-  file = file.path(getwd(), "data", "Soil_Nit_Denit.csv"), 
+  file = file.path(getwd(), "data", "Soil_Nit_Min.csv"), 
   header = TRUE
 )
 
