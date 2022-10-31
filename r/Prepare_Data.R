@@ -45,6 +45,7 @@ str(treats)
 treats$ID_Sys_EP <- as.character(treats$ID_Sys_EP)
 
 # factor treatments
+treats
 treats$Fertility_Source <- factor(
   treats$Fertility_Source,
   levels = c("Synthetic Fertilizer", "Legume")
@@ -53,14 +54,18 @@ treats$Management_System <- factor(
   treats$Management_System,
   levels = c("Conventional", "Organic")
 )
+levels(treats$Management_System) <- c("Conv", "Org")
 treats$Tillage <- factor(
   treats$Tillage,
   levels = c("Till", "Reduced Till")
 )
+levels(treats$Tillage) <- c("T", "RT")
 treats$Cover_Crop <- factor(
   treats$Cover_Crop,
   levels = c("No Cover Crop", "Cover Crop")
 )
+levels(treats$Cover_Crop) <- c("NC", "CC")
+treats
 
 # factor interaction term
 treats$Treatment_Group <- with(
@@ -72,14 +77,14 @@ treats$Treatment_Group <- with(
   )
 )
 levels(treats$Treatment_Group)
-levels(treats$Treatment_Group) <- c(
-  "Con_NC_T", 
-  "Con_CC_T", 
-  "Con_CC_RT", 
-  "Org_CC_T", 
-  "Org_CC_RT"
-)
-levels(treats$Treatment_Group)
+# levels(treats$Treatment_Group) <- c(
+#   "Con_NC_T", 
+#   "Con_CC_T", 
+#   "Con_CC_RT", 
+#   "Org_CC_T", 
+#   "Org_CC_RT"
+# )
+# levels(treats$Treatment_Group)
 
 str(treats)
 
