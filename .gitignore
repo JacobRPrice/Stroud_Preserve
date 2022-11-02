@@ -15,6 +15,9 @@
 */dev/
 Rplots.pdf
 
+# README.Rmd and README.md rendering files 
+/README_files/
+
 # History files
 .Rhistory
 .Rapp.history
