@@ -7,6 +7,10 @@
 # manuscript files
 /manuscript/
 
+# files that the user can generate themselves
+/output/
+/figs/
+
 # development/test scripts
 */dev/
 
