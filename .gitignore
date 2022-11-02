@@ -1,6 +1,9 @@
 # macOS system files
 .DS_Store
 
+# presentation files
+/presentations/
+
 # manuscript files
 /manuscript/
 
