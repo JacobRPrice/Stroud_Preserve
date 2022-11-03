@@ -1,3 +1,11 @@
+# -------------------------------------------------------------------------
+# Only for Running Manually -----------------------------------------------
+# -------------------------------------------------------------------------
+# this section is only for running the script manually, for both building/writing and debugging. 
+# tvar <- "NO3Nstock"
+# -------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+
 # Purpose:  ---------------------------------------------------------------
 # this script will be applied to each of the response variables in the SP dataset. 
 # it will automate the process of performing a number of statistical tests, figure generation, and printing output to files. 
@@ -10,16 +18,7 @@ args = commandArgs(trailingOnly=TRUE)
 tvar <- args[1]
 
 tvar 
-class(tvar)
-
-# -------------------------------------------------------------------------
-# Only for Running Manually -----------------------------------------------
-# -------------------------------------------------------------------------
-# this section is only for running the script manually, for both building/writing and debugging. 
-# tvar <- "NO3Nstock"
-# -------------------------------------------------------------------------
-# -------------------------------------------------------------------------
-
+# class(tvar)
 
 # tasks and output that this script must perform/create -------------------
 # ) table of count of observations for each treatment. 
@@ -35,12 +34,13 @@ class(tvar)
 #     * post-hoc test via TukeyHSD
 # ) create boxplots, off ALL sites (not just those included in the anova)
 
-
-
 # prepare environment -----------------------------------------------------
 library(tidyr)
 library(dplyr)
 library(ggplot2)
+library(openxlsx)
+# library(rstatix)
+# library(ggpubr)
 # library(broom)
 # library(tidyverse)
 # library(corrplot)
@@ -50,12 +50,24 @@ datfull <- dat <-
 
 
 # prepare data ------------------------------------------------------------
-str(dat)
+# str(dat)
 
 # remove NA entries
 dim(dat)
 dat <- dat %>% drop_na(eval(tvar))
 dim(dat)
+
+# if qPCR data is being passed, we must take the log of the values 
+if (tvar %in% c("AOA", "AOB", "nosZ")) {
+  message("Taking log10 of qPCR data.")
+  dat[tvar] <- log10(dat[tvar])
+  # message("Renaming qPCR data for clarity in plots")
+  # names(dat)[which(names(dat) == tvar)] <- paste0("log10(", tvar,")")
+  # tvar <- paste0("log10(", tvar,")")
+}
+
+
+
 
 # create boxplot ----------------------------------------------------------
 # ggpubr used to create these plots
@@ -81,7 +93,7 @@ dat <- dat %>% filter(Site != "COV_31")
 # stat summary of data ----------------------------------------------------
 # https://stackoverflow.com/questions/9057006/getting-strings-recognized-as-variable-names-in-r
 # count, mean, and sd
-out_sample_count_summary <- dat %>% group_by(Management_System, Tillage) %>%
+(out_sample_count_summary <- dat %>% group_by(Management_System, Tillage) %>%
   summarize(
     ct = n(),
     # mean2 = mean(AOA),
@@ -89,13 +101,13 @@ out_sample_count_summary <- dat %>% group_by(Management_System, Tillage) %>%
     # mean = mean(eval(as.name(tvar))), # both of these work
     mean = mean(eval(as.symbol(tvar))), # both of these work
     sd = sd(eval(as.symbol(tvar)))
-  )
+  ) %>% ungroup())
 
-out_man_summary <- dat %>% group_by(Management_System) %>% 
-  rstatix::get_summary_stats(eval(tvar), type = "mean_sd")
+(out_man_summary <- dat %>% group_by(Management_System) %>% 
+  rstatix::get_summary_stats(eval(tvar), type = "mean_sd"))
 
-out_till_summary <- dat %>% group_by(Tillage) %>% 
-  rstatix::get_summary_stats(eval(tvar), type = "mean_sd")
+(out_till_summary <- dat %>% group_by(Tillage) %>% 
+  rstatix::get_summary_stats(eval(tvar), type = "mean_sd"))
 
 # anova -------------------------------------------------------------------
 # original / old way of performing these calcs using base stats and car packages.
@@ -109,23 +121,22 @@ twoway <- lm(
 out_twoway <- car::Anova(twoway, type = 2)
 
 coef(twoway)
-coef(out_twoway)
-# we will double check these estimate values...
 
-names(coef(twoway))
-coef(twoway)["(Intercept)"] + 1*coef(twoway)["Management_System1"]
-# the above does NOT match what I was expecting! 
-# this is most likely due to the different number of observations. 
-
-# conventional till
-coef(twoway)["(Intercept)"] + 1*coef(twoway)["Management_System1"] + 1*coef(twoway)["Tillage1"]
-
-# org red till
-coef(twoway)["(Intercept)"] + -1*coef(twoway)["Management_System1"] + -1*coef(twoway)["Tillage1"]
-
-# will using the rstatix package work better? 
-# i will try this later. 
-# For now... let's work on investigating the use of an interaction model
+# coef(out_twoway)
+# # we will double check these estimate values...
+# names(coef(twoway))
+# coef(twoway)["(Intercept)"] + 1*coef(twoway)["Management_System1"]
+# # the above does NOT match what I was expecting! 
+# # this is most likely due to the different number of observations. 
+# 
+# # conventional till
+# coef(twoway)["(Intercept)"] + 1*coef(twoway)["Management_System1"] + 1*coef(twoway)["Tillage1"]
+# # org red till
+# coef(twoway)["(Intercept)"] + -1*coef(twoway)["Management_System1"] + -1*coef(twoway)["Tillage1"]
+# 
+# # will using the rstatix package work better? 
+# # i will try this later. 
+# # For now... let's work on investigating the use of an interaction model
 
 # start with the interaction model. 
 inter <- lm(
@@ -137,26 +148,21 @@ inter <- lm(
 out_inter <- car::Anova(inter, type = 2)
 
 coef(inter)
-coef(out_inter)
-# we will double check these estimate values...
 
-names(coef(inter))
-
-# conventional till
-coef(inter)["(Intercept)"] + 
-  1*coef(inter)["Management_System1"] + 
-  1*coef(inter)["Tillage1"] +
-  1*coef(inter)["Management_System1:Tillage1"] 
-
-# org red till
-coef(inter)["(Intercept)"] + 
-  -1*coef(inter)["Management_System1"] + 
-  -1*coef(inter)["Tillage1"] +
-  1*coef(inter)["Management_System1:Tillage1"] 
-# it looks like this is the correct way to obtain these values. 
-
-
-
+# coef(out_inter)
+# # we will double check these estimate values...
+# names(coef(inter))
+# # conventional till
+# coef(inter)["(Intercept)"] + 
+#   1*coef(inter)["Management_System1"] + 
+#   1*coef(inter)["Tillage1"] +
+#   1*coef(inter)["Management_System1:Tillage1"] 
+# # org red till
+# coef(inter)["(Intercept)"] + 
+#   -1*coef(inter)["Management_System1"] + 
+#   -1*coef(inter)["Tillage1"] +
+#   1*coef(inter)["Management_System1:Tillage1"] 
+# # it looks like this is the correct way to obtain these values. 
 
 # look at residuals 
 png(
@@ -174,18 +180,104 @@ par(mfrow=c(1,1))
 # https://www.statology.org/anova-assumptions/
 # shapiro.test(dat$AOA)
 
+# ###
+# # trying with rstatix package
+# ###
+# # at least partly following the example pipeline here: 
+# # https://www.datanovia.com/en/lessons/anova-in-r/#computation-1
+# dat %>% group_by(Management_System, Tillage) %>% 
+#   identify_outliers(eval(tvar))
+
 # save output -------------------------------------------------------------
-out <- list(
-  "sample_count_summary" = out_sample_summary,
-  "man_summary" = out_man_summary, 
-  "till_summary" = out_till_summary,
-  "twoway" = out_twoway
+# out <- list(
+#   "sample_count_summary" = out_sample_summary,
+#   "man_summary" = out_man_summary, 
+#   "till_summary" = out_till_summary,
+#   "twoway" = out_twoway
+# )
+# 
+# openxlsx::write.xlsx(
+#   out, 
+#   file = file.path(getwd(), "output", paste0(tvar, "_anova_output.xlsx")), 
+#   rowNames = TRUE,
+#   colNames = TRUE, 
+#   overwrite = TRUE
+# )
+
+if (!"ANOVA_output.xlsx" %in% # check to see if excel file exists
+    list.files(path = file.path(getwd(), "output"))) {
+  
+  # create excel file (workbook object) to accept data, if not present in directory 
+  wb <- createWorkbook()
+  
+} else {
+  wb <- loadWorkbook(file.path(getwd(), "output", "ANOVA_output.xlsx" ))
+}
+
+if (tvar %in% wb$sheet_names) {
+  # remove old sheet
+  removeWorksheet(wb, sheet = tvar)
+  # create new worksheet
+  addWorksheet(wb, sheetName = tvar)
+} else {
+  # create new worksheet
+  addWorksheet(wb, sheetName = tvar)
+}
+
+
+# add output to workbook
+writeData(
+  wb, sheet = tvar, 
+  x = out_sample_count_summary, 
+  startCol = 1, 
+  startRow = 1, 
+  rowNames = TRUE, colNames = TRUE
+)
+writeData(
+  wb, sheet = tvar, 
+  x = out_man_summary, 
+  startCol = 1, 
+  startRow = 7, 
+  rowNames = TRUE, colNames = TRUE
+)
+writeData(
+  wb, sheet = tvar, 
+  x = out_till_summary, 
+  startCol = 1, 
+  startRow = 11, 
+  rowNames = TRUE, colNames = TRUE
+)
+writeData(
+  wb, sheet = tvar, 
+  x = out_twoway, 
+  startCol = 1, 
+  startRow = 15, 
+  rowNames = TRUE, colNames = TRUE
+)
+writeData(
+  wb, sheet = tvar, 
+  x = coef(twoway), 
+  startCol = 6, 
+  startRow = 15, 
+  rowNames = TRUE, colNames = TRUE
+)
+writeData(
+  wb, sheet = tvar, 
+  x = out_inter, 
+  startCol = 1, 
+  startRow = 20, 
+  rowNames = TRUE, colNames = TRUE
+)
+writeData(
+  wb, sheet = tvar, 
+  x = coef(inter), 
+  startCol = 6, 
+  startRow = 20, 
+  rowNames = TRUE, colNames = TRUE
 )
 
-openxlsx::write.xlsx(
-  out, 
-  file = file.path(getwd(), "output", paste0(tvar, "_anova_output.xlsx")), 
-  rowNames = TRUE,
-  colNames = TRUE, 
+# save to file
+saveWorkbook(
+  wb, file = file.path(getwd(), "output", "ANOVA_output.xlsx" ),
   overwrite = TRUE
 )
