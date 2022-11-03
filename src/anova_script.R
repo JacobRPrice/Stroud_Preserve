@@ -16,7 +16,7 @@ class(tvar)
 # Only for Running Manually -----------------------------------------------
 # -------------------------------------------------------------------------
 # this section is only for running the script manually, for both building/writing and debugging. 
-# tvar <- "AOA"
+# tvar <- "NO3Nstock"
 # -------------------------------------------------------------------------
 # -------------------------------------------------------------------------
 
@@ -24,8 +24,7 @@ class(tvar)
 # tasks and output that this script must perform/create -------------------
 # ) table of count of observations for each treatment. 
 # ) perform anova: 
-#     * interaction anova, type II SS
-#     * two-way anova, type III SS
+#     * two-way anova, type II SS
 #   - for each model; 
 #     * obtain tidy output
 #     * check anova model assumptions: 
@@ -71,7 +70,7 @@ p <- ggpubr::ggboxplot(
 )
 
 ggsave(
-  file.path(getwd(), "figs", paste0(tvar,"anova_boxplot.pdf")), 
+  file.path(getwd(), "figs", paste0(tvar,"_anova_boxplot.pdf")), 
   width = 6, height = 5, units = "in"
 )
 
@@ -82,7 +81,7 @@ dat <- dat %>% filter(Site != "COV_31")
 # stat summary of data ----------------------------------------------------
 # https://stackoverflow.com/questions/9057006/getting-strings-recognized-as-variable-names-in-r
 # count, mean, and sd
-out_sample_summary <- dat %>% group_by(Management_System, Tillage) %>%
+out_sample_count_summary <- dat %>% group_by(Management_System, Tillage) %>%
   summarize(
     ct = n(),
     # mean2 = mean(AOA),
@@ -92,18 +91,76 @@ out_sample_summary <- dat %>% group_by(Management_System, Tillage) %>%
     sd = sd(eval(as.symbol(tvar)))
   )
 
-# anova -------------------------------------------------------------------
+out_man_summary <- dat %>% group_by(Management_System) %>% 
+  rstatix::get_summary_stats(eval(tvar), type = "mean_sd")
 
+out_till_summary <- dat %>% group_by(Tillage) %>% 
+  rstatix::get_summary_stats(eval(tvar), type = "mean_sd")
+
+# anova -------------------------------------------------------------------
+# original / old way of performing these calcs using base stats and car packages.
+# I'm going to also try to use the rstatix package instead because it avoids the need for messing with contrasts (it does it automatically).
 twoway <- lm(
   as.formula(paste0(tvar, " ~ Management_System + Tillage")), 
+  contrasts = list(Management_System = contr.sum, Tillage = contr.sum),
   data = dat
 )
 # summary(twoway)
 out_twoway <- car::Anova(twoway, type = 2)
 
+coef(twoway)
+coef(out_twoway)
+# we will double check these estimate values...
+
+names(coef(twoway))
+coef(twoway)["(Intercept)"] + 1*coef(twoway)["Management_System1"]
+# the above does NOT match what I was expecting! 
+# this is most likely due to the different number of observations. 
+
+# conventional till
+coef(twoway)["(Intercept)"] + 1*coef(twoway)["Management_System1"] + 1*coef(twoway)["Tillage1"]
+
+# org red till
+coef(twoway)["(Intercept)"] + -1*coef(twoway)["Management_System1"] + -1*coef(twoway)["Tillage1"]
+
+# will using the rstatix package work better? 
+# i will try this later. 
+# For now... let's work on investigating the use of an interaction model
+
+# start with the interaction model. 
+inter <- lm(
+  as.formula(paste0(tvar, " ~ Management_System * Tillage")), 
+  contrasts = list(Management_System = contr.sum, Tillage = contr.sum),
+  data = dat
+)
+# summary(inter)
+out_inter <- car::Anova(inter, type = 2)
+
+coef(inter)
+coef(out_inter)
+# we will double check these estimate values...
+
+names(coef(inter))
+
+# conventional till
+coef(inter)["(Intercept)"] + 
+  1*coef(inter)["Management_System1"] + 
+  1*coef(inter)["Tillage1"] +
+  1*coef(inter)["Management_System1:Tillage1"] 
+
+# org red till
+coef(inter)["(Intercept)"] + 
+  -1*coef(inter)["Management_System1"] + 
+  -1*coef(inter)["Tillage1"] +
+  1*coef(inter)["Management_System1:Tillage1"] 
+# it looks like this is the correct way to obtain these values. 
+
+
+
+
 # look at residuals 
 png(
-  file.path(getwd(), "figs", paste0(tvar,"anova_residuals.png")), 
+  file.path(getwd(), "figs", paste0(tvar,"_anova_residuals.png")), 
   width = 2*480, height = 2*480
 )
 par(mfrow=c(2,2))
@@ -119,8 +176,10 @@ par(mfrow=c(1,1))
 
 # save output -------------------------------------------------------------
 out <- list(
-  "twoway" = out_twoway, 
-  "sample_summary" = out_sample_summary
+  "sample_count_summary" = out_sample_summary,
+  "man_summary" = out_man_summary, 
+  "till_summary" = out_till_summary,
+  "twoway" = out_twoway
 )
 
 openxlsx::write.xlsx(
