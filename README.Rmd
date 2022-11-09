@@ -24,10 +24,10 @@ The goal of Stroud_Preserve is to ...
 ```mermaid
 stateDiagram-v2
 [*] --> Raw Data
-Raw Data --> Processed Data
-\Processed Data --> Temporal Variation
-Temporal Variation --> Figures
-Processed Data --> ANOVA
+Raw_Data --> Processed_Data
+Processed_Data --> Temporal_Variation
+Temporal_Variation --> Figures
+Processed_Data --> ANOVA
 ANOVA --> Figures
 ANOVA --> Tables
 ```
