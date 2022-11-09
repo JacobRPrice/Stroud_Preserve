@@ -23,7 +23,7 @@ The goal of Stroud_Preserve is to ...
 <!-- https://twitter.com/diegohaz/status/1590043504428077056 -->
 ```mermaid
 stateDiagram-v2
-[*] --> Raw Data
+[*] --> Raw_Data
 Raw_Data --> Processed_Data
 Processed_Data --> Temporal_Variation
 Temporal_Variation --> Figures

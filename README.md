@@ -17,7 +17,7 @@ The goal of Stroud\_Preserve is to …
 
 ``` mermaid
 stateDiagram-v2
-[*] --> Raw Data
+[*] --> Raw_Data
 Raw_Data --> Processed_Data
 Processed_Data --> Temporal_Variation
 Temporal_Variation --> Figures
