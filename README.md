@@ -9,6 +9,23 @@
 
 The goal of Stroud\_Preserve is to …
 
+## Process Flow Diagram
+
+<!-- Source for idea: -->
+
+<!-- https://twitter.com/diegohaz/status/1590043504428077056 -->
+
+``` mermaid
+stateDiagram-v2
+[*] --> Raw Data
+Raw Data --> Processed Data
+\Processed Data --> Temporal Variation
+Temporal Variation --> Figures
+Processed Data --> ANOVA
+ANOVA --> Figures
+ANOVA --> Tables
+```
+
 ## Description of scripts within this repo:
 
   - ./r/Prepare\_Data.R - this script imports the various raw data files
