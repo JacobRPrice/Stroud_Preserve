@@ -81,6 +81,7 @@ eea <- subset(
   )
 ) +
     theme_bw() +
+    geom_hline(yintercept = 0) +
     geom_point() +
     geom_smooth(se = FALSE) +
     facet_grid(Parameter~., scales = "free_y") +
