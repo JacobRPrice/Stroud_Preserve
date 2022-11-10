@@ -2,6 +2,11 @@
 # overall -----------------------------------------------------------------
 # TODO:
 # * Change variable names to something more descriptive/easier to read. 
+      # netMIN to Net Mineralization
+      # netNIT to Net Nitrification
+      # NH4Nstock to Soil Ammonium-N
+      # NO3Nstock to Soil Nitrate-N
+      # GLU_gSoil to GLU, and similar for other EEA
 # * subset data to just the parameters we are reporting on. 
 
 
