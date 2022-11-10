@@ -27,6 +27,7 @@
 # Main Text Figures: Seasonal ---------------------------------------------
 # will be based off of the process in temporal_script.R
 # TODO: 
+#   * reorder the facets in the seasonal plots. 
 #   * remove "value" from the y axis label
 #   * add black line at y=0 if y=0 exists on the y axis as normally plotted. 
 #   * colors: use colors to differentiate between years 
