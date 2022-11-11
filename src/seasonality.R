@@ -121,7 +121,7 @@ eea <- subset(
     geom_smooth(se = FALSE) +
     # facet_grid(Parameter~., scales = "free_y") +
     facet_grid(
-      factor(Parameter, levels = c("GLU", "NAG", "PHO", "OM_percent", "Moisture_percent"))~., 
+      factor(Parameter, levels = c("GLU", "NAG", "PHO", "Moisture_percent", "OM_percent"))~., 
       scales = "free_y"
     ) +
     scale_x_continuous(limits = c(60,340)) + 
@@ -216,7 +216,7 @@ ggsave(
     geom_smooth(se = FALSE) +
     # facet_grid(Parameter~., scales = "free_y") +
     facet_grid(
-      factor(Parameter, levels = c("GLU", "NAG", "PHO", "OM_percent", "Moisture_percent"))~., 
+      factor(Parameter, levels = c("GLU", "NAG", "PHO", "Moisture_percent", "OM_percent"))~., 
       scales = "free_y"
     ) +
     scale_x_continuous(limits = c(60,340)) + 
