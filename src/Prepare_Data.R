@@ -337,6 +337,10 @@ str(dat)
 dat <- rename(
   dat, 
   nosZ = NosZ,
+  Net_Mineralization = netMIN, 
+  Net_Nitrification = netNIT,
+  Soil_NH4N = NH4Nstock,
+  Soil_NO3N = NO3Nstock,
   GLU_gSoil = EEA_umol_hr_gdrysoil_GLU, 
   NAG_gSoil = EEA_umol_hr_gdrysoil_NAG, 
   PHO_gSoil = EEA_umol_hr_gdrysoil_PHO, 
