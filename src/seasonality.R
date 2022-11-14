@@ -143,7 +143,7 @@ ggsave(
 )
 ggsave(
   plot = peea,
-  filename = file.path(getwd(), "figs", "2020_vs_2021_qEEA.pdf"), 
+  filename = file.path(getwd(), "figs", "2020_vs_2021_EEA.pdf"), 
   width = 6, height = 5*2, units = "in"
 )
 
@@ -238,7 +238,7 @@ ggsave(
 )
 ggsave(
   plot = apeea,
-  filename = file.path(getwd(), "figs", "2020_vs_2021_qEEA_supp.pdf"), 
+  filename = file.path(getwd(), "figs", "2020_vs_2021_EEA_supp.pdf"), 
   width = 6, height = 5*2, units = "in"
 )
 
