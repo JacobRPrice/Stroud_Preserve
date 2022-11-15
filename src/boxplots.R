@@ -7,10 +7,10 @@ dat <- readRDS(file.path(getwd(), "/data/", "dat.RDS"))
 
 # prepare data ------------------------------------------------------------
 
-# take log of qPCR data
-dat$AOA <- log10(dat$AOA)
-dat$AOB <- log10(dat$AOB)
-dat$nosZ <- log10(dat$nosZ)
+# # take log of qPCR data
+# dat$AOA <- log10(dat$AOA)
+# dat$AOB <- log10(dat$AOB)
+# dat$nosZ <- log10(dat$nosZ)
 
 # # subset to just the eea data of interest 
 # dat <- dat %>% select(-c("GLU_gOM", "NAG_gOM", "PHO_gOM"))
@@ -88,7 +88,8 @@ eea <- eea %>% drop_na(value)
       legend.position = "bottom",
       axis.text.y = element_text(angle = 90, hjust = 0.5, size = rel(0.6)), 
       axis.text.x = element_text(size = rel(0.7))
-    )
+    ) +
+    scale_y_continuous(trans = "log10")
 )
 
 (pnitmin <- ggpubr::ggboxplot(
