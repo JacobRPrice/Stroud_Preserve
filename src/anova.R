@@ -60,18 +60,18 @@ dat <- dat %>% filter(Site != "COV_31")
 # names(modlist) <- names(dat)[7:18]
 
 modlist <- list(
-  AOA <- lm(log10(AOA) ~ Management_System + Tillage, data = dat),
-  AOB <- lm(log10(AOB) ~ Management_System + Tillage, data = dat),
-  nosZ <- lm(log10(nosZ) ~ Management_System + Tillage, data = dat),
-  Net_Mineralization <- lm(Net_Mineralization ~ Management_System + Tillage, data = dat),
-  Net_Nitrification <- lm(Net_Nitrification ~ Management_System + Tillage, data = dat),
-  Soil_NH4N <- lm(Soil_NH4N ~ Management_System + Tillage, data = dat),
-  Soil_NO3N <- lm(Soil_NO3N ~ Management_System + Tillage, data = dat),
-  OM_percent <- lm(OM_percent ~ Management_System + Tillage, data = dat),
-  Moisture_percent <- lm(Moisture_percent ~ Management_System + Tillage, data = dat),
-  GLU <- lm(GLU ~ Management_System + Tillage, data = dat),
-  NAG <- lm(NAG ~ Management_System + Tillage, data = dat),
-  PHO <- lm(PHO ~ Management_System + Tillage, data = dat)
+  lm(log10(AOA) ~ Management_System / Tillage, data = dat),
+  lm(log10(AOB) ~ Management_System / Tillage, data = dat),
+  lm(log10(nosZ) ~ Management_System / Tillage, data = dat),
+  lm(Net_Mineralization ~ Management_System / Tillage, data = dat),
+  lm(Net_Nitrification ~ Management_System / Tillage, data = dat),
+  lm(Soil_NH4N ~ Management_System / Tillage, data = dat),
+  lm(Soil_NO3N ~ Management_System / Tillage, data = dat),
+  lm(OM_percent ~ Management_System / Tillage, data = dat),
+  lm(Moisture_percent ~ Management_System / Tillage, data = dat),
+  lm(GLU ~ Management_System / Tillage, data = dat),
+  lm(NAG ~ Management_System / Tillage, data = dat),
+  lm(PHO ~ Management_System / Tillage, data = dat)
 )
 names(modlist) <- names(dat)[7:18]
 
@@ -109,7 +109,7 @@ car::Anova(modlist[[1]], type = 2)
 emmlist <- lapply(
   X = modlist, 
   FUN = function(i) {
-    temm <- emmeans(object = i, specs = ~ Management_System + Tillage, type = "response")
+    temm <- emmeans(object = i, specs = ~ Management_System / Tillage, type = "response")
     temm <- as.data.frame(temm)
     return(temm)
   }
@@ -172,19 +172,19 @@ contdfM <- do.call("rbind", contlistM)
 # )
 
 # comparisons: tillage (within management system) -------------------------
-emmeans(modlist$OM_percent, specs = ~ Tillage)
-emmeans(modlist$OM_percent, specs = ~ Tillage, type = "response")
-emmeans(modlist$OM_percent, specs = ~ Tillage | Management_System)
-emmeans(modlist$OM_percent, specs = ~ Tillage | Management_System, type = "response")
-
-contrast(emmeans(modlist$OM_percent, specs = ~ Tillage))
-contrast(emmeans(modlist$OM_percent, specs = ~ Tillage | Management_System))
-contrast(emmeans(modlist$OM_percent, specs = ~ Tillage | Management_System),  method = "pairwise")
+# emmeans(modlist$OM_percent, specs = ~ Tillage)
+# emmeans(modlist$OM_percent, specs = ~ Tillage, type = "response")
+# emmeans(modlist$OM_percent, specs = ~ Tillage | Management_System)
+# emmeans(modlist$OM_percent, specs = ~ Tillage | Management_System, type = "response")
+# 
+# contrast(emmeans(modlist$OM_percent, specs = ~ Tillage))
+# contrast(emmeans(modlist$OM_percent, specs = ~ Tillage | Management_System))
+# contrast(emmeans(modlist$OM_percent, specs = ~ Tillage | Management_System),  method = "pairwise")
 
 contlistT <- lapply(
   X = modlist, 
   FUN = function(i) {
-    temm <- emmeans(object = i, specs = ~ Tillage, type = "response")
+    temm <- emmeans(object = i, specs = ~ Tillage | Management_System, type = "response")
     tcont <- contrast(temm, method = "pairwise")
     tcont <- as.data.frame(tcont)
   }
@@ -195,13 +195,13 @@ contlistT
 contlistT[[3]]
 contlistT[[4]]
 names(contlistT[[1]])
-contlistT[[1]] <- contlistT[[1]][,-5]
-contlistT[[2]] <- contlistT[[2]][,-5]
-contlistT[[3]] <- contlistT[[3]][,-5]
+contlistT[[1]] <- contlistT[[1]][,-6]
+contlistT[[2]] <- contlistT[[2]][,-6]
+contlistT[[3]] <- contlistT[[3]][,-6]
 # rename "ratio" to "estimate" so we can bind qPCR data entries with others 
-colnames(contlistT[[1]])[2] <- "estimate"
-colnames(contlistT[[2]])[2] <- "estimate"
-colnames(contlistT[[3]])[2] <- "estimate"
+colnames(contlistT[[1]])[3] <- "estimate"
+colnames(contlistT[[2]])[3] <- "estimate"
+colnames(contlistT[[3]])[3] <- "estimate"
 
 contdfT <- do.call("rbind", contlistT)
 
