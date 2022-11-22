@@ -204,6 +204,7 @@ colnames(contlistT[[2]])[3] <- "estimate"
 colnames(contlistT[[3]])[3] <- "estimate"
 
 contdfT <- do.call("rbind", contlistT)
+contdfT$Parameter <- rep(names(modlist), each = 2)
 
 
 # export output  ----------------------------------------------------------
