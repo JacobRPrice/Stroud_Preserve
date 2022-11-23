@@ -22,7 +22,10 @@ dat <- rename(
 
 # filter conventional sites
 datfull <- dat
-dat <- dat %>% filter(Site != "COV_31")
+dat <- datfull %>% filter(Site != "COV_31")
+datttest <- datfull %>% filter(
+  Treatment_Group %in% c("Conv.NC.T", "Conv.CC.T")
+)
 
 # conventional means for use in table -------------------------------------
 (conv.mean <- datfull %>% filter(Site == "COV_31") %>% 
@@ -207,6 +210,41 @@ contdfT <- do.call("rbind", contlistT)
 contdfT$Parameter <- rep(names(modlist), each = 2)
 
 
+# conv NC to conv CC comparisons ------------------------------------------
+
+with(datttest, table(Treatment_Group, Cover_Crop))
+
+ttestls <- list(
+  t.test(log10(AOA) ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(log10(AOB) ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(log10(nosZ) ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(Net_Mineralization ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(Net_Nitrification ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(Soil_NH4N ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(Soil_NO3N ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(OM_percent ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(Moisture_percent ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(GLU ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(NAG ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(PHO ~ Cover_Crop, paired = FALSE, data = datttest)
+)
+
+names(ttestls) <- names(dat)[7:18]
+ttestls
+broom::tidy(ttestls[["PHO"]])
+ttestresls <- lapply(
+  X = ttestls, 
+  FUN = function(i) {
+    broom::tidy(i)
+  }
+)
+ttestresls
+
+ttestdf <- do.call("rbind", ttestresls)
+ttestdf$Parameter <- names(ttestls)
+names(ttestdf)[which(names(ttestdf) == "parameter")] <- "df"
+names(ttestdf)[which(names(ttestdf) == "statistic")] <- "t"
+
 # export output  ----------------------------------------------------------
 if (!"ANOVA_output.xlsx" %in% # check to see if excel file exists
     list.files(path = file.path(getwd(), "output"))) {
@@ -218,6 +256,7 @@ if (!"ANOVA_output.xlsx" %in% # check to see if excel file exists
   addWorksheet(wb, sheet ="emmdf")
   addWorksheet(wb, sheet ="contdfM")
   addWorksheet(wb, sheet ="contdfT")
+  addWorksheet(wb, sheet ="ttestdf")
   
 } else {
   wb <- loadWorkbook(file.path(getwd(), "output", "ANOVA_output.xlsx" ))
@@ -227,12 +266,14 @@ if (!"ANOVA_output.xlsx" %in% # check to see if excel file exists
   removeWorksheet(wb, sheet ="emmdf")
   removeWorksheet(wb, sheet ="contdfM")
   removeWorksheet(wb, sheet ="contdfT")
+  removeWorksheet(wb, sheet ="ttestdf")
   
   addWorksheet(wb, sheet ="conv_mean")
   addWorksheet(wb, sheet ="anovadf")
   addWorksheet(wb, sheet ="emmdf")
   addWorksheet(wb, sheet ="contdfM")
   addWorksheet(wb, sheet ="contdfT")
+  addWorksheet(wb, sheet ="ttestdf")
 }
 
 
@@ -278,6 +319,13 @@ writeData(
   rowNames = TRUE, colNames = TRUE
 )
 
+writeData(
+  wb, 
+  x = ttestdf,
+  sheet = "ttestdf", 
+  startCol = 1, startRow = 1, 
+  rowNames = TRUE, colNames = TRUE
+)
 
 # save to file
 saveWorkbook(
