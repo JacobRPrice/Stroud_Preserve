@@ -9,16 +9,16 @@ dat <- readRDS(file.path(getwd(), "/data/", "dat.RDS"))
 
 # prepare data ------------------------------------------------------------
 
-# # subset to just the eea data of interest 
-dat <- dat %>% select(-c("GLU_gOM", "NAG_gOM", "PHO_gOM"))
-
-# rename eea variables for cleanliness 
-dat <- rename(
-  dat, 
-  GLU = GLU_gSoil, 
-  NAG = NAG_gSoil, 
-  PHO = PHO_gSoil
-)
+# # # subset to just the eea data of interest 
+# dat <- dat %>% select(-c("GLU_gOM", "NAG_gOM", "PHO_gOM"))
+# 
+# # rename eea variables for cleanliness 
+# dat <- rename(
+#   dat, 
+#   GLU = GLU_gSoil, 
+#   NAG = NAG_gSoil, 
+#   PHO = PHO_gSoil
+# )
 
 # filter conventional sites
 datfull <- dat
@@ -30,7 +30,7 @@ datttest <- datfull %>% filter(
 # conventional means for use in table -------------------------------------
 (conv.mean <- datfull %>% filter(Site == "COV_31") %>% 
    tidyr::pivot_longer(
-     cols = names(datfull)[-c(1:6)], names_to = "Parameter"
+     cols = names(datfull)[-c(1:9)], names_to = "Parameter"
    ) %>% 
    drop_na(value) %>% 
    group_by(Parameter) %>% 
@@ -62,6 +62,7 @@ datttest <- datfull %>% filter(
 # )
 # names(modlist) <- names(dat)[7:18]
 
+names(dat)
 modlist <- list(
   lm(log10(AOA) ~ Management_System / Tillage, data = dat),
   lm(log10(AOB) ~ Management_System / Tillage, data = dat),
@@ -72,11 +73,24 @@ modlist <- list(
   lm(Soil_NO3N ~ Management_System / Tillage, data = dat),
   lm(OM_percent ~ Management_System / Tillage, data = dat),
   lm(Moisture_percent ~ Management_System / Tillage, data = dat),
-  lm(GLU ~ Management_System / Tillage, data = dat),
-  lm(NAG ~ Management_System / Tillage, data = dat),
-  lm(PHO ~ Management_System / Tillage, data = dat)
+  lm(GLU_gSoil ~ Management_System / Tillage, data = dat),
+  lm(NAG_gSoil ~ Management_System / Tillage, data = dat),
+  lm(PHO_gSoil ~ Management_System / Tillage, data = dat),
+  lm(`ln(GLU)_gSoil` ~ Management_System / Tillage, data = dat),
+  lm(`ln(NAG)_gSoil` ~ Management_System / Tillage, data = dat),
+  lm(`ln(PHO)_gSoil` ~ Management_System / Tillage, data = dat),
+  lm(`ln(GLU:NAG)_gSoil` ~ Management_System / Tillage, data = dat),
+  lm(`ln(GLU:PHO)_gSoil` ~ Management_System / Tillage, data = dat),
+  lm(GLU_gOM ~ Management_System / Tillage, data = dat),
+  lm(NAG_gOM ~ Management_System / Tillage, data = dat),
+  lm(PHO_gOM ~ Management_System / Tillage, data = dat),
+  lm(`ln(GLU)_gOM` ~ Management_System / Tillage, data = dat),
+  lm(`ln(NAG)_gOM` ~ Management_System / Tillage, data = dat),
+  lm(`ln(PHO)_gOM` ~ Management_System / Tillage, data = dat),
+  lm(`ln(GLU:NAG)_gOM` ~ Management_System / Tillage, data = dat),
+  lm(`ln(GLU:PHO)_gOM` ~ Management_System / Tillage, data = dat)
 )
-names(modlist) <- names(dat)[7:18]
+names(modlist) <- names(dat)[10:34]
 
 
 ###
@@ -224,14 +238,27 @@ ttestls <- list(
   t.test(Soil_NO3N ~ Cover_Crop, paired = FALSE, data = datttest),
   t.test(OM_percent ~ Cover_Crop, paired = FALSE, data = datttest),
   t.test(Moisture_percent ~ Cover_Crop, paired = FALSE, data = datttest),
-  t.test(GLU ~ Cover_Crop, paired = FALSE, data = datttest),
-  t.test(NAG ~ Cover_Crop, paired = FALSE, data = datttest),
-  t.test(PHO ~ Cover_Crop, paired = FALSE, data = datttest)
+  t.test(GLU_gSoil ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(NAG_gSoil ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(PHO_gSoil ~ Cover_Crop, paired = FALSE, data = datttest), 
+  t.test(`ln(GLU)_gSoil` ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(`ln(NAG)_gSoil` ~ Cover_Crop, paired = FALSE, data = datttest), 
+  t.test(`ln(PHO)_gSoil` ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(`ln(GLU:NAG)_gSoil` ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(`ln(GLU:PHO)_gSoil` ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(GLU_gOM ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(NAG_gOM ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(PHO_gOM ~ Cover_Crop, paired = FALSE, data = datttest), 
+  t.test(`ln(GLU)_gOM` ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(`ln(NAG)_gOM` ~ Cover_Crop, paired = FALSE, data = datttest), 
+  t.test(`ln(PHO)_gOM` ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(`ln(GLU:NAG)_gOM` ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(`ln(GLU:PHO)_gOM` ~ Cover_Crop, paired = FALSE, data = datttest) 
 )
 
-names(ttestls) <- names(dat)[7:18]
+names(ttestls) <- names(dat)[10:34]
 ttestls
-broom::tidy(ttestls[["PHO"]])
+broom::tidy(ttestls[["PHO_gSoil"]])
 ttestresls <- lapply(
   X = ttestls, 
   FUN = function(i) {
