@@ -349,6 +349,25 @@ dat <- rename(
   PHO_gOM = EEA_umol_hr_gOM_PHO
 )
 
+# calculate date info -----------------------------------------------------
+dat$Year <- lubridate::year(dat$Date)
+dat$Year <- as.factor(dat$Year)
+dat$Month <- lubridate::month(dat$Date)
+dat$Day <- lubridate::yday(dat$Date)
+
+# calculate eea ratios ----------------------------------------------------
+dat$"ln(GLU)_gSoil" <- log(dat$GLU_gSoil)
+dat$"ln(NAG)_gSoil" <- log(dat$NAG_gSoil)
+dat$"ln(PHO)_gSoil" <- log(dat$PHO_gSoil)
+dat$"ln(GLU:NAG)_gSoil" <- log(dat$GLU_gSoil/dat$NAG_gSoil)
+dat$"ln(GLU:PHO)_gSoil" <- log(dat$GLU_gSoil/dat$PHO_gSoil)
+
+dat$"ln(GLU)_gOM" <- log(dat$GLU_gOM)
+dat$"ln(NAG)_gOM" <- log(dat$NAG_gOM)
+dat$"ln(PHO)_gOM" <- log(dat$PHO_gOM)
+dat$"ln(GLU:NAG)_gOM" <- log(dat$GLU_gOM/dat$NAG_gOM)
+dat$"ln(GLU:PHO)_gOM" <- log(dat$GLU_gOM/dat$PHO_gOM)
+
 # save to disk ------------------------------------------------------------
 # as .csv
 write.csv(
