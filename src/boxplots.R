@@ -16,48 +16,62 @@ dat <- readRDS(file.path(getwd(), "/data/", "dat.RDS"))
 # dat <- dat %>% select(-c("GLU_gOM", "NAG_gOM", "PHO_gOM"))
 
 # rename eea variables for cleanliness 
-dat <- rename(
-  dat, 
-  GLU = GLU_gSoil, 
-  NAG = NAG_gSoil, 
-  PHO = PHO_gSoil
-)
+# dat <- rename(
+#   dat, 
+#   GLU = GLU_gSoil, 
+#   NAG = NAG_gSoil, 
+#   PHO = PHO_gSoil
+# )
 
 # subset by analysis type
-metadata <- c("Date", "Site", "Management_System" , "Tillage", "Cover_Crop", "Treatment_Group")
+metadata <- c(
+  "Date", "Site", "Management_System" , "Tillage", "Cover_Crop", "Treatment_Group",
+  "Year", "Month", "Day"
+  )
 qpcr <- subset(
   dat, 
   select = c(
-    metadata, c("AOA", "AOB", "nosZ")
+    metadata, 
+    c("AOA", "AOB", "nosZ")
   )
 )
 NitMin <- subset(
   dat,
   select = c(
-    metadata, c("Net_Mineralization", "Net_Nitrification", "Soil_NH4N", "Soil_NO3N")
+    metadata, 
+    c("Net_Mineralization", "Net_Nitrification", "Soil_NH4N", "Soil_NO3N")
   )
 )
 eea <- subset(
   dat,
   select = c(
-    metadata, c("OM_percent", "Moisture_percent", "GLU", "NAG", "PHO"))
+    # metadata, c("OM_percent", "Moisture_percent", "GLU", "NAG", "PHO"))
+    metadata, 
+    c(
+      "OM_percent", "Moisture_percent",
+      "GLU_gSoil", "NAG_gSoil", "PHO_gSoil", 
+      "GLU_gOM", "NAG_gOM", "PHO_gOM", 
+      "ln(GLU)_gSoil", "ln(NAG)_gSoil", "ln(PHO)_gSoil", "ln(GLU:NAG)_gSoil", "ln(GLU:PHO)_gSoil", 
+      "ln(GLU)_gOM", "ln(NAG)_gOM", "ln(PHO)_gOM", "ln(GLU:NAG)_gOM", "ln(GLU:PHO)_gOM"
+    )
+  )
 )
 
-
 # restructure data
+names(qpcr)
 qpcr <- pivot_longer(
   data = qpcr, 
-  cols = names(qpcr)[-c(1:6)], 
+  cols = names(qpcr)[-c(1:9)], 
   names_to = "Parameter"
 )
 NitMin <- pivot_longer(
   data = NitMin, 
-  cols = names(NitMin)[-c(1:6)], 
+  cols = names(NitMin)[-c(1:9)], 
   names_to = "Parameter"
 )
 eea <- pivot_longer(
   data = eea, 
-  cols = names(eea)[-c(1:6)], 
+  cols = names(eea)[-c(1:9)], 
   names_to = "Parameter"
 )
 
@@ -67,80 +81,148 @@ NitMin <- NitMin %>% drop_na(value)
 eea <- eea %>% drop_na(value) 
 
 
-# plot --------------------------------------------------------------------
-(pqpcr <- ggpubr::ggboxplot(
+# # plot --------------------------------------------------------------------
+# (pqpcr <- ggpubr::ggboxplot(
+#   data = qpcr, 
+#   x = "Treatment_Group", 
+#   y = "value",
+#   col = "Tillage", 
+#   add = "jitter",
+#   shape = "Management_System",
+#   ylab = FALSE,
+#   ggtheme = theme_bw()
+# ))  
+# (pqpcr <- ggpubr::facet(
+#   pqpcr, 
+#   facet.by = "Parameter", 
+#   scales = "free",
+#   ncol = 1
+# ) +
+#     theme(
+#       legend.position = "bottom",
+#       axis.text.y = element_text(angle = 90, hjust = 0.5, size = rel(0.6)), 
+#       axis.text.x = element_text(size = rel(0.7))
+#     ) +
+#     scale_y_continuous(trans = "log10")
+# )
+# 
+# (pnitmin <- ggpubr::ggboxplot(
+#   data = NitMin, 
+#   x = "Treatment_Group", 
+#   y = "value",
+#   col = "Tillage", 
+#   add = "jitter",
+#   shape = "Management_System",
+#   ylab = FALSE,
+#   ggtheme = theme_bw()
+# ))  
+# (pnitmin <- ggpubr::facet(
+#   pnitmin, 
+#   facet.by = "Parameter", 
+#   scales = "free",
+#   nrow = 2,
+#   ncol = 2
+# ) +
+#     theme(
+#       legend.position = "bottom",
+#       axis.text.y = element_text(angle = 90, hjust = 0.5, size = rel(0.6)), 
+#       axis.text.x = element_text(size = rel(0.7))
+#     )
+# )
+# 
+# (peea <- ggpubr::ggboxplot(
+#   data = eea, 
+#   x = "Treatment_Group", 
+#   y = "value",
+#   col = "Tillage", 
+#   add = "jitter",
+#   shape = "Management_System",
+#   ylab = FALSE,
+#   ggtheme = theme_bw()
+# ))  
+# (peea <- ggpubr::facet(
+#   peea, 
+#   facet.by = "Parameter", 
+#   scales = "free",
+#   nrow = 3,
+#   ncol = 2
+# ) +
+#     theme(
+#       legend.position = "bottom",
+#       axis.text.y = element_text(angle = 90, hjust = 0.5, size = rel(0.6)), 
+#       axis.text.x = element_text(size = rel(0.7))
+#     )
+# )
+
+# create boxplots ---------------------------------------------------------
+
+(pqpcr <- ggplot(
   data = qpcr, 
-  x = "Treatment_Group", 
-  y = "value",
-  col = "Tillage", 
-  add = "jitter",
-  shape = "Management_System",
-  ylab = FALSE,
-  ggtheme = theme_bw()
-))  
-(pqpcr <- ggpubr::facet(
-  pqpcr, 
-  facet.by = "Parameter", 
-  scales = "free",
-  ncol = 1
+  aes(
+    x = Treatment_Group, 
+    y = value, 
+    color = Tillage
+  )
 ) +
-    theme(
-      legend.position = "bottom",
-      axis.text.y = element_text(angle = 90, hjust = 0.5, size = rel(0.6)), 
-      axis.text.x = element_text(size = rel(0.7))
-    ) +
-    scale_y_continuous(trans = "log10")
+  theme_bw() +
+  geom_boxplot() +
+  geom_jitter(aes(shape = Year), width = 0.2, alpha = 0.5) +
+  facet_grid(Parameter ~ ., scales = "free_y") + 
+  # facet_grid(Parameter ~ Year, scales = "free_y") + 
+  theme(
+    legend.position = "bottom", 
+    axis.title.y = element_blank()#, 
+    # axis.text.y = element_text(angle = 90, hjust = 0.5, size = rel(0.6)), 
+    # axis.text.x = element_text(size = rel(0.7))
+  ) +
+  scale_y_continuous(trans = "log10") 
 )
 
-(pnitmin <- ggpubr::ggboxplot(
+(pnitmin <- ggplot(
   data = NitMin, 
-  x = "Treatment_Group", 
-  y = "value",
-  col = "Tillage", 
-  add = "jitter",
-  shape = "Management_System",
-  ylab = FALSE,
-  ggtheme = theme_bw()
-))  
-(pnitmin <- ggpubr::facet(
-  pnitmin, 
-  facet.by = "Parameter", 
-  scales = "free",
-  nrow = 2,
-  ncol = 2
+  aes(
+    x = Treatment_Group, 
+    y = value, 
+    color = Tillage
+  )
 ) +
+    theme_bw() +
+    geom_hline(yintercept = 0) +
+    geom_boxplot() +
+    geom_jitter(aes(shape = Year), width = 0.2, alpha = 0.5) +
+    facet_grid(Parameter ~ ., scales = "free_y") + 
+    # facet_grid(Parameter ~ Year, scales = "free_y") + 
     theme(
-      legend.position = "bottom",
-      axis.text.y = element_text(angle = 90, hjust = 0.5, size = rel(0.6)), 
-      axis.text.x = element_text(size = rel(0.7))
-    )
+      legend.position = "bottom", 
+      axis.title.y = element_blank()#, 
+      # axis.text.y = element_text(angle = 90, hjust = 0.5, size = rel(0.6)), 
+      # axis.text.x = element_text(size = rel(0.7))
+    ) 
 )
 
-(peea <- ggpubr::ggboxplot(
+(peea <- ggplot(
   data = eea, 
-  x = "Treatment_Group", 
-  y = "value",
-  col = "Tillage", 
-  add = "jitter",
-  shape = "Management_System",
-  ylab = FALSE,
-  ggtheme = theme_bw()
-))  
-(peea <- ggpubr::facet(
-  peea, 
-  facet.by = "Parameter", 
-  scales = "free",
-  nrow = 3,
-  ncol = 2
+  aes(
+    x = Treatment_Group, 
+    y = value, 
+    color = Tillage
+  )
 ) +
+    theme_bw() +
+    # geom_hline(yintercept = 0) +
+    geom_boxplot() +
+    geom_jitter(aes(shape = Year), width = 0.2, alpha = 0.5) +
+    facet_grid(Parameter ~ ., scales = "free_y") + 
+    # facet_grid(Parameter ~ Year, scales = "free_y") + 
     theme(
-      legend.position = "bottom",
-      axis.text.y = element_text(angle = 90, hjust = 0.5, size = rel(0.6)), 
-      axis.text.x = element_text(size = rel(0.7))
-    )
+      legend.position = "bottom", 
+      axis.title.y = element_blank()#, 
+      # axis.text.y = element_text(angle = 90, hjust = 0.5, size = rel(0.6)), 
+      # axis.text.x = element_text(size = rel(0.7))
+    ) 
 )
 
-
+# save figures ------------------------------------------------------------
 ggsave(
   plot = pqpcr, 
   filename = file.path(getwd(), "figs", "boxplot_qPCR.pdf"), 
@@ -154,6 +236,27 @@ ggsave(
 ggsave(
   plot = peea, 
   filename = file.path(getwd(), "figs", "boxplot_EEA.pdf"), 
-  width = 6, height = 6, units = "in"
+  # width = 6, height = 6, units = "in"
+  width = 6, height = 18*2, units = "in"
 )
 
+
+# # combine into a single plot ----------------------------------------------
+# ggplot(
+#   data = dat
+# )
+# 
+# library(gridExtra)
+# 
+# grid.arrange(
+#   arrangeGrob(
+#     pnitmin, peea, pqpcr, 
+#     ncol = 3
+#   )
+# )
+# grid.arrange(
+#   arrangeGrob(
+#     pnitmin, peea, pqpcr, 
+#     layout_matrix = cbind(c(1, 1), c(2, 2), c(3))
+#   )
+# )
