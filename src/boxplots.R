@@ -75,6 +75,26 @@ eea <- pivot_longer(
   names_to = "Parameter"
 )
 
+# order parameters according to how they need to be displayed
+qpcr$Parameter <- factor(
+  qpcr$Parameter, 
+  levels = c("AOA", "AOB", "nosZ")
+)
+NitMin$Parameter <- factor(
+  NitMin$Parameter, 
+  levels = c("Net_Nitrification", "Soil_NH4N", "Net_Mineralization", "Soil_NO3N")
+)
+eea$Parameter <- factor(
+  eea$Parameter, 
+  levels = c(
+    "OM_percent", "Moisture_percent",
+    "GLU_gSoil", "NAG_gSoil", "PHO_gSoil", 
+    "GLU_gOM", "NAG_gOM", "PHO_gOM", 
+    "ln(GLU)_gSoil", "ln(NAG)_gSoil", "ln(PHO)_gSoil", "ln(GLU:NAG)_gSoil", "ln(GLU:PHO)_gSoil", 
+    "ln(GLU)_gOM", "ln(NAG)_gOM", "ln(PHO)_gOM", "ln(GLU:NAG)_gOM", "ln(GLU:PHO)_gOM"
+  )
+)
+
 # remove NA entries
 qpcr <- qpcr %>% drop_na(value)
 NitMin <- NitMin %>% drop_na(value) 
