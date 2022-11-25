@@ -6,30 +6,12 @@ library(ggplot2)
 dat <- readRDS(file.path(getwd(), "/data/", "dat.RDS"))
 
 # prepare data ------------------------------------------------------------
-# get year and month/day
-dat$Year <- lubridate::year(dat$Date)
-dat$Year <- as.factor(dat$Year)
-dat$Month <- lubridate::month(dat$Date)
-dat$Day <- lubridate::yday(dat$Date)
-
-# # take log of qPCR data
-# dat$AOA <- log10(dat$AOA)
-# dat$AOB <- log10(dat$AOB)
-# dat$nosZ <- log10(dat$nosZ)
-
-# rename eea variables for cleanliness 
-dat <- rename(
-  dat, 
-  GLU = GLU_gSoil, 
-  NAG = NAG_gSoil, 
-  PHO = PHO_gSoil
-)
-
 # restructure data
+names(dat)
 str(dat)
 dat <- pivot_longer(
   data = dat, 
-  cols = names(dat)[-c(1:6, 22:24)], 
+  cols = names(dat)[-c(1:9)],
   names_to = "Parameter"
 )
 str(dat)
@@ -46,16 +28,36 @@ qpcr <- subset(
 )
 NitMin <- subset(
   dat,
-  # Parameter %in% c("netMIN", "netNIT", "NH4Nstock", "NO3Nstock")
   Parameter %in% c("Net_Mineralization", "Net_Nitrification", "Soil_NH4N", "Soil_NO3N")
 )
 eea <- subset(
   dat,
   Parameter %in% c(
-    "OM_percent", "Moisture_percent", 
-    "GLU", "NAG", "PHO"
-    # "GLU_gSoil", "NAG_gSoil", "PHO_gSoil"#, 
-    # "GLU_gOM", "NAG_gOM", "PHO_gOM"
+    "OM_percent", "Moisture_percent",
+    "BG_gSoil", "NAG_gSoil", "AP_gSoil", 
+    "ln(BG)_gSoil", "ln(NAG)_gSoil", "ln(AP)_gSoil", "ln(BG:NAG)_gSoil", "ln(BG:AP)_gSoil", 
+    "BG_gOM", "NAG_gOM", "AP_gOM", 
+    "ln(BG)_gOM", "ln(NAG)_gOM", "ln(AP)_gOM", "ln(BG:NAG)_gOM", "ln(BG:AP)_gOM"
+  )
+)
+
+# order parameters according to how they need to be displayed
+qpcr$Parameter <- factor(
+  qpcr$Parameter, 
+  levels = c("AOA", "AOB", "nosZ")
+)
+NitMin$Parameter <- factor(
+  NitMin$Parameter, 
+  levels = c("Net_Nitrification", "Soil_NH4N", "Net_Mineralization", "Soil_NO3N")
+)
+eea$Parameter <- factor(
+  eea$Parameter, 
+  levels = c(
+    "OM_percent", "Moisture_percent",
+    "BG_gSoil", "NAG_gSoil", "AP_gSoil", 
+    "ln(BG)_gSoil", "ln(NAG)_gSoil", "ln(AP)_gSoil", "ln(BG:NAG)_gSoil", "ln(BG:AP)_gSoil", 
+    "BG_gOM", "NAG_gOM", "AP_gOM", 
+    "ln(BG)_gOM", "ln(NAG)_gOM", "ln(AP)_gOM", "ln(BG:NAG)_gOM", "ln(BG:AP)_gOM"
   )
 )
 
@@ -95,11 +97,7 @@ eea <- subset(
     geom_hline(yintercept = 0) +
     geom_point() +
     geom_smooth(se = FALSE) +
-    # facet_grid(Parameter~., scales = "free_y") +
-    facet_grid(
-      factor(Parameter, levels = c("Net_Nitrification", "Soil_NH4N", "Net_Mineralization", "Soil_NO3N"))~., 
-      scales = "free_y"
-    ) +
+    facet_grid(Parameter~., scales = "free_y") +
     scale_x_continuous(limits = c(60,340)) + 
     theme(
       axis.title.y = element_blank(), 
@@ -119,11 +117,7 @@ eea <- subset(
     theme_bw() +
     geom_point() +
     geom_smooth(se = FALSE) +
-    # facet_grid(Parameter~., scales = "free_y") +
-    facet_grid(
-      factor(Parameter, levels = c("GLU", "NAG", "PHO", "Moisture_percent", "OM_percent"))~., 
-      scales = "free_y"
-    ) +
+    facet_grid(Parameter~., scales = "free_y") +
     scale_x_continuous(limits = c(60,340)) + 
     theme(
       axis.title.y = element_blank(), 
@@ -144,7 +138,8 @@ ggsave(
 ggsave(
   plot = peea,
   filename = file.path(getwd(), "figs", "2020_vs_2021_EEA.pdf"), 
-  width = 6, height = 5*2, units = "in"
+  # width = 6, height = 5*2, units = "in"
+  width = 6, height = 18*2, units = "in"
 )
 
 
@@ -172,9 +167,11 @@ ggsave(
   scale_y_continuous(trans = "log10") + 
   # ylab("Gene Copies / g Soil (Log10 Scaled)") +
   theme(
-    axis.title.y = element_blank()#,
-    # legend.position = "bottom"
-  )
+    axis.title.y = element_blank(),
+    legend.position = "bottom"
+  ) +
+  guides(color = guide_legend(nrow = 2, byrow = TRUE)) +
+  guides(linetype = guide_legend(nrow = 2))
 )
 
 (apnitmin <- ggplot(
@@ -190,16 +187,14 @@ ggsave(
     geom_hline(yintercept = 0) +
     geom_point() +
     geom_smooth(se = FALSE) +
-    # facet_grid(Parameter~., scales = "free_y") +
-    facet_grid(
-      factor(Parameter, levels = c("Net_Nitrification", "Soil_NH4N", "Net_Mineralization", "Soil_NO3N"))~., 
-      scales = "free_y"
-    ) +
+    facet_grid(Parameter~., scales = "free_y") +
     scale_x_continuous(limits = c(60,340)) + 
     theme(
-      axis.title.y = element_blank()#,
-      # legend.position = "bottom"
-    )
+      axis.title.y = element_blank(),
+      legend.position = "bottom"
+    ) +
+    guides(color = guide_legend(nrow = 2, byrow = TRUE)) +
+    guides(linetype = guide_legend(nrow = 2))
 )
 
 (apeea <- ggplot(
@@ -214,16 +209,14 @@ ggsave(
     theme_bw() +
     geom_point() +
     geom_smooth(se = FALSE) +
-    # facet_grid(Parameter~., scales = "free_y") +
-    facet_grid(
-      factor(Parameter, levels = c("GLU", "NAG", "PHO", "Moisture_percent", "OM_percent"))~., 
-      scales = "free_y"
-    ) +
+    facet_grid(Parameter~., scales = "free_y") +
     scale_x_continuous(limits = c(60,340)) + 
     theme(
-      axis.title.y = element_blank()#,
-      # legend.position = "bottom"
-    )
+      axis.title.y = element_blank(),
+      legend.position = "bottom"
+    ) +
+    guides(color = guide_legend(nrow = 2, byrow = TRUE)) +
+    guides(linetype = guide_legend(nrow = 2))
 )
 
 ggsave(
@@ -239,6 +232,7 @@ ggsave(
 ggsave(
   plot = apeea,
   filename = file.path(getwd(), "figs", "2020_vs_2021_EEA_supp.pdf"), 
-  width = 6, height = 5*2, units = "in"
+  # width = 6, height = 5*2, units = "in"
+  width = 6, height = 18*2, units = "in"
 )
 

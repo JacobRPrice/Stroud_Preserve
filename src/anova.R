@@ -9,17 +9,6 @@ dat <- readRDS(file.path(getwd(), "/data/", "dat.RDS"))
 
 # prepare data ------------------------------------------------------------
 
-# # subset to just the eea data of interest 
-dat <- dat %>% select(-c("GLU_gOM", "NAG_gOM", "PHO_gOM"))
-
-# rename eea variables for cleanliness 
-dat <- rename(
-  dat, 
-  GLU = GLU_gSoil, 
-  NAG = NAG_gSoil, 
-  PHO = PHO_gSoil
-)
-
 # filter conventional sites
 datfull <- dat
 dat <- datfull %>% filter(Site != "COV_31")
@@ -30,38 +19,21 @@ datttest <- datfull %>% filter(
 # conventional means for use in table -------------------------------------
 (conv.mean <- datfull %>% filter(Site == "COV_31") %>% 
    tidyr::pivot_longer(
-     cols = names(datfull)[-c(1:6)], names_to = "Parameter"
+     cols = names(datfull)[-c(1:9)], names_to = "Parameter"
    ) %>% 
    drop_na(value) %>% 
    group_by(Parameter) %>% 
    summarise(Conv.Mean = mean(value))
 )  
 
-
 # anova -------------------------------------------------------------------
 
 ###
 # specify models 
 ###
-# specify_model <- function(targvar) {
-#   # targvar <- deparse(substitute(targvar))
-#   # print(dim(dat))
-#   tmpdat <- dat %>% drop_na(eval(targvar))
-#   # print(dim(tmpdat))
-#   tmpmod <- lm(
-#     as.formula(paste0(targvar, " ~ Management_System / Tillage")), 
-#     data = tmpdat
-#   )
-#   return(tmpmod)
-# }
-# # specify_model("AOA")
-# 
-# modlist <- lapply(
-#   X = names(dat[7:18]), 
-#   FUN = specify_model
-# )
-# names(modlist) <- names(dat)[7:18]
 
+names(dat)
+names(dat)[10:34]
 modlist <- list(
   lm(log10(AOA) ~ Management_System / Tillage, data = dat),
   lm(log10(AOB) ~ Management_System / Tillage, data = dat),
@@ -72,11 +44,24 @@ modlist <- list(
   lm(Soil_NO3N ~ Management_System / Tillage, data = dat),
   lm(OM_percent ~ Management_System / Tillage, data = dat),
   lm(Moisture_percent ~ Management_System / Tillage, data = dat),
-  lm(GLU ~ Management_System / Tillage, data = dat),
-  lm(NAG ~ Management_System / Tillage, data = dat),
-  lm(PHO ~ Management_System / Tillage, data = dat)
+  lm(BG_gSoil ~ Management_System / Tillage, data = dat),
+  lm(NAG_gSoil ~ Management_System / Tillage, data = dat),
+  lm(AP_gSoil ~ Management_System / Tillage, data = dat),
+  lm(BG_gOM ~ Management_System / Tillage, data = dat),
+  lm(NAG_gOM ~ Management_System / Tillage, data = dat),
+  lm(AP_gOM ~ Management_System / Tillage, data = dat),
+  lm(`ln(BG)_gSoil` ~ Management_System / Tillage, data = dat),
+  lm(`ln(NAG)_gSoil` ~ Management_System / Tillage, data = dat),
+  lm(`ln(AP)_gSoil` ~ Management_System / Tillage, data = dat),
+  lm(`ln(BG:NAG)_gSoil` ~ Management_System / Tillage, data = dat),
+  lm(`ln(BG:AP)_gSoil` ~ Management_System / Tillage, data = dat),
+  lm(`ln(BG)_gOM` ~ Management_System / Tillage, data = dat),
+  lm(`ln(NAG)_gOM` ~ Management_System / Tillage, data = dat),
+  lm(`ln(AP)_gOM` ~ Management_System / Tillage, data = dat),
+  lm(`ln(BG:NAG)_gOM` ~ Management_System / Tillage, data = dat),
+  lm(`ln(BG:AP)_gOM` ~ Management_System / Tillage, data = dat)
 )
-names(modlist) <- names(dat)[7:18]
+names(modlist) <- names(dat)[10:34]
 
 
 ###
@@ -105,7 +90,7 @@ anovalist <- lapply(
 (anovadf <- do.call("rbind", anovalist))
 
 # double check that the order of entries are correct. 
-car::Anova(modlist[[1]], type = 2)
+car::Anova(modlist[[25]], type = 2)
 
 
 # estimated marginal means ------------------------------------------------
@@ -224,14 +209,27 @@ ttestls <- list(
   t.test(Soil_NO3N ~ Cover_Crop, paired = FALSE, data = datttest),
   t.test(OM_percent ~ Cover_Crop, paired = FALSE, data = datttest),
   t.test(Moisture_percent ~ Cover_Crop, paired = FALSE, data = datttest),
-  t.test(GLU ~ Cover_Crop, paired = FALSE, data = datttest),
-  t.test(NAG ~ Cover_Crop, paired = FALSE, data = datttest),
-  t.test(PHO ~ Cover_Crop, paired = FALSE, data = datttest)
+  t.test(BG_gSoil ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(NAG_gSoil ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(AP_gSoil ~ Cover_Crop, paired = FALSE, data = datttest), 
+  t.test(BG_gOM ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(NAG_gOM ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(AP_gOM ~ Cover_Crop, paired = FALSE, data = datttest), 
+  t.test(`ln(BG)_gSoil` ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(`ln(NAG)_gSoil` ~ Cover_Crop, paired = FALSE, data = datttest), 
+  t.test(`ln(AP)_gSoil` ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(`ln(BG:NAG)_gSoil` ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(`ln(BG:AP)_gSoil` ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(`ln(BG)_gOM` ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(`ln(NAG)_gOM` ~ Cover_Crop, paired = FALSE, data = datttest), 
+  t.test(`ln(AP)_gOM` ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(`ln(BG:NAG)_gOM` ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(`ln(BG:AP)_gOM` ~ Cover_Crop, paired = FALSE, data = datttest) 
 )
 
-names(ttestls) <- names(dat)[7:18]
+names(ttestls) <- names(dat)[10:34]
 ttestls
-broom::tidy(ttestls[["PHO"]])
+broom::tidy(ttestls[["AP_gSoil"]])
 ttestresls <- lapply(
   X = ttestls, 
   FUN = function(i) {
