@@ -368,6 +368,14 @@ dat$"ln(PHO)_gOM" <- log(dat$PHO_gOM)
 dat$"ln(GLU:NAG)_gOM" <- log(dat$GLU_gOM/dat$NAG_gOM)
 dat$"ln(GLU:PHO)_gOM" <- log(dat$GLU_gOM/dat$PHO_gOM)
 
+# reorganize data ---------------------------------------------------------
+names(dat)
+# (relocate(dat, c(Year, Month, Day), .after = Treatment_Group))
+dat <- dat %>% relocate(Day, .after = Treatment_Group) %>% 
+  relocate(Month, .after = Treatment_Group) %>% 
+  relocate(Year, .after = Treatment_Group)
+names(dat)
+
 # save to disk ------------------------------------------------------------
 # as .csv
 write.csv(
