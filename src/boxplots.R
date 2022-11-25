@@ -113,7 +113,8 @@ eea <- eea %>% drop_na(value)
     geom_hline(yintercept = 0) +
     geom_boxplot() +
     geom_jitter(aes(shape = Year), width = 0.2, alpha = 0.5) +
-    facet_grid(Parameter ~ ., scales = "free_y") + 
+    # facet_grid(Parameter ~ ., scales = "free_y") + 
+    facet_wrap(Parameter ~ ., scales = "free_y", nrow = 2) +
     theme(
       legend.position = "bottom", 
       axis.title.y = element_blank()
