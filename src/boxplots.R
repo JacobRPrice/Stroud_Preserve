@@ -7,27 +7,8 @@ dat <- readRDS(file.path(getwd(), "/data/", "dat.RDS"))
 
 # prepare data ------------------------------------------------------------
 
-# # take log of qPCR data
-# dat$AOA <- log10(dat$AOA)
-# dat$AOB <- log10(dat$AOB)
-# dat$nosZ <- log10(dat$nosZ)
-
-# # subset to just the eea data of interest 
-# dat <- dat %>% select(-c("GLU_gOM", "NAG_gOM", "PHO_gOM"))
-
-# rename eea variables for cleanliness 
-# dat <- rename(
-#   dat, 
-#   GLU = GLU_gSoil, 
-#   NAG = NAG_gSoil, 
-#   PHO = PHO_gSoil
-# )
-
 # subset by analysis type
-metadata <- c(
-  "Date", "Site", "Management_System" , "Tillage", "Cover_Crop", "Treatment_Group",
-  "Year", "Month", "Day"
-  )
+metadata <- c("Date", "Site", "Management_System" , "Tillage", "Cover_Crop", "Treatment_Group", "Year", "Month", "Day")
 qpcr <- subset(
   dat, 
   select = c(
@@ -45,14 +26,13 @@ NitMin <- subset(
 eea <- subset(
   dat,
   select = c(
-    # metadata, c("OM_percent", "Moisture_percent", "GLU", "NAG", "PHO"))
     metadata, 
     c(
       "OM_percent", "Moisture_percent",
-      "GLU_gSoil", "NAG_gSoil", "PHO_gSoil", 
-      "GLU_gOM", "NAG_gOM", "PHO_gOM", 
-      "ln(GLU)_gSoil", "ln(NAG)_gSoil", "ln(PHO)_gSoil", "ln(GLU:NAG)_gSoil", "ln(GLU:PHO)_gSoil", 
-      "ln(GLU)_gOM", "ln(NAG)_gOM", "ln(PHO)_gOM", "ln(GLU:NAG)_gOM", "ln(GLU:PHO)_gOM"
+      "BG_gSoil", "NAG_gSoil", "AP_gSoil", 
+      "ln(BG)_gSoil", "ln(NAG)_gSoil", "ln(AP)_gSoil", "ln(BG:NAG)_gSoil", "ln(BG:AP)_gSoil", 
+      "BG_gOM", "NAG_gOM", "AP_gOM", 
+      "ln(BG)_gOM", "ln(NAG)_gOM", "ln(AP)_gOM", "ln(BG:NAG)_gOM", "ln(BG:AP)_gOM"
     )
   )
 )
@@ -88,10 +68,10 @@ eea$Parameter <- factor(
   eea$Parameter, 
   levels = c(
     "OM_percent", "Moisture_percent",
-    "GLU_gSoil", "NAG_gSoil", "PHO_gSoil", 
-    "GLU_gOM", "NAG_gOM", "PHO_gOM", 
-    "ln(GLU)_gSoil", "ln(NAG)_gSoil", "ln(PHO)_gSoil", "ln(GLU:NAG)_gSoil", "ln(GLU:PHO)_gSoil", 
-    "ln(GLU)_gOM", "ln(NAG)_gOM", "ln(PHO)_gOM", "ln(GLU:NAG)_gOM", "ln(GLU:PHO)_gOM"
+    "BG_gSoil", "NAG_gSoil", "AP_gSoil", 
+    "ln(BG)_gSoil", "ln(NAG)_gSoil", "ln(AP)_gSoil", "ln(BG:NAG)_gSoil", "ln(BG:AP)_gSoil", 
+    "BG_gOM", "NAG_gOM", "AP_gOM", 
+    "ln(BG)_gOM", "ln(NAG)_gOM", "ln(AP)_gOM", "ln(BG:NAG)_gOM", "ln(BG:AP)_gOM"
   )
 )
 
@@ -99,80 +79,6 @@ eea$Parameter <- factor(
 qpcr <- qpcr %>% drop_na(value)
 NitMin <- NitMin %>% drop_na(value) 
 eea <- eea %>% drop_na(value) 
-
-
-# # plot --------------------------------------------------------------------
-# (pqpcr <- ggpubr::ggboxplot(
-#   data = qpcr, 
-#   x = "Treatment_Group", 
-#   y = "value",
-#   col = "Tillage", 
-#   add = "jitter",
-#   shape = "Management_System",
-#   ylab = FALSE,
-#   ggtheme = theme_bw()
-# ))  
-# (pqpcr <- ggpubr::facet(
-#   pqpcr, 
-#   facet.by = "Parameter", 
-#   scales = "free",
-#   ncol = 1
-# ) +
-#     theme(
-#       legend.position = "bottom",
-#       axis.text.y = element_text(angle = 90, hjust = 0.5, size = rel(0.6)), 
-#       axis.text.x = element_text(size = rel(0.7))
-#     ) +
-#     scale_y_continuous(trans = "log10")
-# )
-# 
-# (pnitmin <- ggpubr::ggboxplot(
-#   data = NitMin, 
-#   x = "Treatment_Group", 
-#   y = "value",
-#   col = "Tillage", 
-#   add = "jitter",
-#   shape = "Management_System",
-#   ylab = FALSE,
-#   ggtheme = theme_bw()
-# ))  
-# (pnitmin <- ggpubr::facet(
-#   pnitmin, 
-#   facet.by = "Parameter", 
-#   scales = "free",
-#   nrow = 2,
-#   ncol = 2
-# ) +
-#     theme(
-#       legend.position = "bottom",
-#       axis.text.y = element_text(angle = 90, hjust = 0.5, size = rel(0.6)), 
-#       axis.text.x = element_text(size = rel(0.7))
-#     )
-# )
-# 
-# (peea <- ggpubr::ggboxplot(
-#   data = eea, 
-#   x = "Treatment_Group", 
-#   y = "value",
-#   col = "Tillage", 
-#   add = "jitter",
-#   shape = "Management_System",
-#   ylab = FALSE,
-#   ggtheme = theme_bw()
-# ))  
-# (peea <- ggpubr::facet(
-#   peea, 
-#   facet.by = "Parameter", 
-#   scales = "free",
-#   nrow = 3,
-#   ncol = 2
-# ) +
-#     theme(
-#       legend.position = "bottom",
-#       axis.text.y = element_text(angle = 90, hjust = 0.5, size = rel(0.6)), 
-#       axis.text.x = element_text(size = rel(0.7))
-#     )
-# )
 
 # create boxplots ---------------------------------------------------------
 
@@ -188,12 +94,9 @@ eea <- eea %>% drop_na(value)
   geom_boxplot() +
   geom_jitter(aes(shape = Year), width = 0.2, alpha = 0.5) +
   facet_grid(Parameter ~ ., scales = "free_y") + 
-  # facet_grid(Parameter ~ Year, scales = "free_y") + 
   theme(
     legend.position = "bottom", 
-    axis.title.y = element_blank()#, 
-    # axis.text.y = element_text(angle = 90, hjust = 0.5, size = rel(0.6)), 
-    # axis.text.x = element_text(size = rel(0.7))
+    axis.title.y = element_blank()
   ) +
   scale_y_continuous(trans = "log10") 
 )
@@ -211,12 +114,9 @@ eea <- eea %>% drop_na(value)
     geom_boxplot() +
     geom_jitter(aes(shape = Year), width = 0.2, alpha = 0.5) +
     facet_grid(Parameter ~ ., scales = "free_y") + 
-    # facet_grid(Parameter ~ Year, scales = "free_y") + 
     theme(
       legend.position = "bottom", 
-      axis.title.y = element_blank()#, 
-      # axis.text.y = element_text(angle = 90, hjust = 0.5, size = rel(0.6)), 
-      # axis.text.x = element_text(size = rel(0.7))
+      axis.title.y = element_blank()
     ) 
 )
 
@@ -229,16 +129,12 @@ eea <- eea %>% drop_na(value)
   )
 ) +
     theme_bw() +
-    # geom_hline(yintercept = 0) +
     geom_boxplot() +
     geom_jitter(aes(shape = Year), width = 0.2, alpha = 0.5) +
     facet_grid(Parameter ~ ., scales = "free_y") + 
-    # facet_grid(Parameter ~ Year, scales = "free_y") + 
     theme(
       legend.position = "bottom", 
-      axis.title.y = element_blank()#, 
-      # axis.text.y = element_text(angle = 90, hjust = 0.5, size = rel(0.6)), 
-      # axis.text.x = element_text(size = rel(0.7))
+      axis.title.y = element_blank()
     ) 
 )
 
@@ -259,24 +155,3 @@ ggsave(
   # width = 6, height = 6, units = "in"
   width = 6, height = 18*2, units = "in"
 )
-
-
-# # combine into a single plot ----------------------------------------------
-# ggplot(
-#   data = dat
-# )
-# 
-# library(gridExtra)
-# 
-# grid.arrange(
-#   arrangeGrob(
-#     pnitmin, peea, pqpcr, 
-#     ncol = 3
-#   )
-# )
-# grid.arrange(
-#   arrangeGrob(
-#     pnitmin, peea, pqpcr, 
-#     layout_matrix = cbind(c(1, 1), c(2, 2), c(3))
-#   )
-# )

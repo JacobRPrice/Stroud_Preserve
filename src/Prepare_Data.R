@@ -341,12 +341,12 @@ dat <- rename(
   Net_Nitrification = netNIT,
   Soil_NH4N = NH4Nstock,
   Soil_NO3N = NO3Nstock,
-  GLU_gSoil = EEA_umol_hr_gdrysoil_GLU, 
+  BG_gSoil = EEA_umol_hr_gdrysoil_GLU, 
   NAG_gSoil = EEA_umol_hr_gdrysoil_NAG, 
-  PHO_gSoil = EEA_umol_hr_gdrysoil_PHO, 
-  GLU_gOM = EEA_umol_hr_gOM_GLU, 
+  AP_gSoil = EEA_umol_hr_gdrysoil_PHO, 
+  BG_gOM = EEA_umol_hr_gOM_GLU, 
   NAG_gOM = EEA_umol_hr_gOM_NAG, 
-  PHO_gOM = EEA_umol_hr_gOM_PHO
+  AP_gOM = EEA_umol_hr_gOM_PHO
 )
 
 # calculate date info -----------------------------------------------------
@@ -356,17 +356,17 @@ dat$Month <- lubridate::month(dat$Date)
 dat$Day <- lubridate::yday(dat$Date)
 
 # calculate eea ratios ----------------------------------------------------
-dat$"ln(GLU)_gSoil" <- log(dat$GLU_gSoil)
+dat$"ln(BG)_gSoil" <- log(dat$BG_gSoil)
 dat$"ln(NAG)_gSoil" <- log(dat$NAG_gSoil)
-dat$"ln(PHO)_gSoil" <- log(dat$PHO_gSoil)
-dat$"ln(GLU:NAG)_gSoil" <- log(dat$GLU_gSoil/dat$NAG_gSoil)
-dat$"ln(GLU:PHO)_gSoil" <- log(dat$GLU_gSoil/dat$PHO_gSoil)
+dat$"ln(AP)_gSoil" <- log(dat$AP_gSoil)
+dat$"ln(BG:NAG)_gSoil" <- log(dat$BG_gSoil/dat$NAG_gSoil)
+dat$"ln(BG:AP)_gSoil" <- log(dat$BG_gSoil/dat$AP_gSoil)
 
-dat$"ln(GLU)_gOM" <- log(dat$GLU_gOM)
+dat$"ln(BG)_gOM" <- log(dat$BG_gOM)
 dat$"ln(NAG)_gOM" <- log(dat$NAG_gOM)
-dat$"ln(PHO)_gOM" <- log(dat$PHO_gOM)
-dat$"ln(GLU:NAG)_gOM" <- log(dat$GLU_gOM/dat$NAG_gOM)
-dat$"ln(GLU:PHO)_gOM" <- log(dat$GLU_gOM/dat$PHO_gOM)
+dat$"ln(AP)_gOM" <- log(dat$AP_gOM)
+dat$"ln(BG:NAG)_gOM" <- log(dat$BG_gOM/dat$NAG_gOM)
+dat$"ln(BG:AP)_gOM" <- log(dat$BG_gOM/dat$AP_gOM)
 
 # reorganize data ---------------------------------------------------------
 names(dat)
