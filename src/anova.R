@@ -53,13 +53,13 @@ modlist <- list(
   lm(`ln(BG)_gSoil` ~ Management_System / Tillage, data = dat),
   lm(`ln(NAG)_gSoil` ~ Management_System / Tillage, data = dat),
   lm(`ln(AP)_gSoil` ~ Management_System / Tillage, data = dat),
-  lm(`ln(BG:NAG)_gSoil` ~ Management_System / Tillage, data = dat),
-  lm(`ln(BG:AP)_gSoil` ~ Management_System / Tillage, data = dat),
+  lm(`ln(BG):ln(NAG)_gSoil` ~ Management_System / Tillage, data = dat),
+  lm(`ln(BG):ln(AP)_gSoil` ~ Management_System / Tillage, data = dat),
   lm(`ln(BG)_gOM` ~ Management_System / Tillage, data = dat),
   lm(`ln(NAG)_gOM` ~ Management_System / Tillage, data = dat),
   lm(`ln(AP)_gOM` ~ Management_System / Tillage, data = dat),
-  lm(`ln(BG:NAG)_gOM` ~ Management_System / Tillage, data = dat),
-  lm(`ln(BG:AP)_gOM` ~ Management_System / Tillage, data = dat)
+  lm(`ln(BG):ln(NAG)_gOM` ~ Management_System / Tillage, data = dat),
+  lm(`ln(BG):ln(AP)_gOM` ~ Management_System / Tillage, data = dat)
 )
 names(modlist) <- names(dat)[10:34]
 
@@ -218,13 +218,13 @@ ttestls <- list(
   t.test(`ln(BG)_gSoil` ~ Cover_Crop, paired = FALSE, data = datttest),
   t.test(`ln(NAG)_gSoil` ~ Cover_Crop, paired = FALSE, data = datttest), 
   t.test(`ln(AP)_gSoil` ~ Cover_Crop, paired = FALSE, data = datttest),
-  t.test(`ln(BG:NAG)_gSoil` ~ Cover_Crop, paired = FALSE, data = datttest),
-  t.test(`ln(BG:AP)_gSoil` ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(`ln(BG):ln(NAG)_gSoil` ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(`ln(BG):ln(AP)_gSoil` ~ Cover_Crop, paired = FALSE, data = datttest),
   t.test(`ln(BG)_gOM` ~ Cover_Crop, paired = FALSE, data = datttest),
   t.test(`ln(NAG)_gOM` ~ Cover_Crop, paired = FALSE, data = datttest), 
   t.test(`ln(AP)_gOM` ~ Cover_Crop, paired = FALSE, data = datttest),
-  t.test(`ln(BG:NAG)_gOM` ~ Cover_Crop, paired = FALSE, data = datttest),
-  t.test(`ln(BG:AP)_gOM` ~ Cover_Crop, paired = FALSE, data = datttest) 
+  t.test(`ln(BG):ln(NAG)_gOM` ~ Cover_Crop, paired = FALSE, data = datttest),
+  t.test(`ln(BG):ln(AP)_gOM` ~ Cover_Crop, paired = FALSE, data = datttest) 
 )
 
 names(ttestls) <- names(dat)[10:34]

@@ -359,14 +359,14 @@ dat$Day <- lubridate::yday(dat$Date)
 dat$"ln(BG)_gSoil" <- log(dat$BG_gSoil)
 dat$"ln(NAG)_gSoil" <- log(dat$NAG_gSoil)
 dat$"ln(AP)_gSoil" <- log(dat$AP_gSoil)
-dat$"ln(BG:NAG)_gSoil" <- log(dat$BG_gSoil/dat$NAG_gSoil)
-dat$"ln(BG:AP)_gSoil" <- log(dat$BG_gSoil/dat$AP_gSoil)
+dat$"ln(BG):ln(NAG)_gSoil" <- dat$`ln(BG)_gSoil`/dat$`ln(NAG)_gSoil`
+dat$"ln(BG):ln(AP)_gSoil" <- dat$`ln(BG)_gSoil`/dat$`ln(AP)_gSoil`
 
 dat$"ln(BG)_gOM" <- log(dat$BG_gOM)
 dat$"ln(NAG)_gOM" <- log(dat$NAG_gOM)
 dat$"ln(AP)_gOM" <- log(dat$AP_gOM)
-dat$"ln(BG:NAG)_gOM" <- log(dat$BG_gOM/dat$NAG_gOM)
-dat$"ln(BG:AP)_gOM" <- log(dat$BG_gOM/dat$AP_gOM)
+dat$"ln(BG):ln(NAG)_gOM" <- dat$`ln(BG)_gOM`/dat$`ln(NAG)_gOM`
+dat$"ln(BG):ln(AP)_gOM" <- dat$`ln(BG)_gOM`/dat$`ln(AP)_gOM`
 
 # reorganize data ---------------------------------------------------------
 names(dat)
