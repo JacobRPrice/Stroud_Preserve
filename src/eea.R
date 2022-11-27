@@ -57,7 +57,10 @@ ggplot(
   aes(
     x = OM_percent, 
     y = value, 
-    color = Treatment_Group
+    color = Treatment_Group#, 
+    # shape = Year, 
+    # group = interaction(Year, Treatment_Group),
+    # linetype = Year
   )
 ) +
   theme_bw() +
@@ -81,7 +84,10 @@ ggplot(
   aes(
     x = Moisture_percent,
     y = value,
-    color = Treatment_Group
+    color = Treatment_Group#, 
+    # shape = Year, 
+    # group = interaction(Year, Treatment_Group),
+    # linetype = Year
   )
 ) +
   theme_bw() +
@@ -105,12 +111,19 @@ ggsave(
 # https://statisticsglobe.com/add-common-legend-to-combined-ggplot2-plots-in-r/
 library(patchwork)
 
+# shape = Year,
+#     # group = interaction(Year, Treatment_Group),
+#     # linetype = Year
+
 pSoil_N.B <- ggplot(
   data = datfull,
   aes(
     x = `ln(NAG)_gSoil`,
     y = `ln(BG)_gSoil`,
-    color = Treatment_Group
+    color = Treatment_Group#, 
+    # shape = Year, 
+    # group = interaction(Year, Treatment_Group),
+    # linetype = Year
   )
 ) +
   theme_bw() +
@@ -125,7 +138,10 @@ pSoil_A.B <- ggplot(
   aes(
     x = `ln(AP)_gSoil`,
     y = `ln(BG)_gSoil`,
-    color = Treatment_Group
+    color = Treatment_Group#, 
+    # shape = Year, 
+    # group = interaction(Year, Treatment_Group),
+    # linetype = Year
   )
 ) +
   theme_bw() +
@@ -140,7 +156,10 @@ pSoil_BGAP.BGNAG <- ggplot(
   aes(
     x = `ln(BG):ln(AP)_gSoil`,
     y = `ln(BG):ln(NAG)_gSoil`,
-    color = Treatment_Group
+    color = Treatment_Group#, 
+    # shape = Year, 
+    # group = interaction(Year, Treatment_Group),
+    # linetype = Year
   )
 ) +
   theme_bw() +
@@ -164,7 +183,10 @@ pOM_N.B <- ggplot(
   aes(
     x = `ln(NAG)_gOM`,
     y = `ln(BG)_gOM`,
-    color = Treatment_Group
+    color = Treatment_Group#, 
+    # shape = Year, 
+    # group = interaction(Year, Treatment_Group),
+    # linetype = Year
   )
 ) +
   theme_bw() +
@@ -179,7 +201,10 @@ pOM_A.B <- ggplot(
   aes(
     x = `ln(AP)_gOM`,
     y = `ln(BG)_gOM`,
-    color = Treatment_Group
+    color = Treatment_Group#, 
+    # shape = Year, 
+    # group = interaction(Year, Treatment_Group),
+    # linetype = Year
   )
 ) +
   theme_bw() +
@@ -194,7 +219,10 @@ pOM_BGAP.BGNAG <- ggplot(
   aes(
     x = `ln(BG):ln(AP)_gOM`,
     y = `ln(BG):ln(NAG)_gOM`,
-    color = Treatment_Group
+    color = Treatment_Group#, 
+    # shape = Year, 
+    # group = interaction(Year, Treatment_Group),
+    # linetype = Year
   )
 ) +
   theme_bw() +
