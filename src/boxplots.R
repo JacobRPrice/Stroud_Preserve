@@ -20,7 +20,7 @@ NitMin <- subset(
   dat,
   select = c(
     metadata, 
-    c("Net_Mineralization", "Net_Nitrification", "Soil_NH4N", "Soil_NO3N")
+    c("Net_Nitrification", "Soil_NH4N", "Net_Mineralization", "Soil_NO3N")
   )
 )
 eea <- subset(
@@ -43,7 +43,7 @@ datmain <- subset(
   select = c(
     metadata,
     c(
-      "Net_Mineralization", "Soil_NH4N",
+      "Net_Nitrification", "Soil_NH4N", "Net_Mineralization", "Soil_NO3N",
       
       "AOA", "AOB", "nosZ", 
       
@@ -102,7 +102,7 @@ eea$Parameter <- factor(
 datmain$Parameter <- factor(
   datmain$Parameter,
   levels = c(
-    "Net_Mineralization", "Soil_NH4N",
+    "Net_Nitrification", "Soil_NH4N", "Net_Mineralization", "Soil_NO3N",
     
     "AOA", "AOB", "nosZ", 
     

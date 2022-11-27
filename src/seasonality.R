@@ -45,7 +45,7 @@ eea <- subset(
 datmain <- subset(
   dat, 
   Parameter %in% c(
-    "Net_Mineralization", "Soil_NH4N",
+    "Net_Nitrification", "Soil_NH4N", "Net_Mineralization", "Soil_NO3N",
     
     "ln(BG)_gSoil", "ln(NAG)_gSoil", "ln(AP)_gSoil", 
     "ln(BG):ln(NAG)_gSoil", "ln(BG):ln(AP)_gSoil", 
@@ -80,7 +80,7 @@ eea$Parameter <- factor(
 datmain$Parameter <- factor(
   datmain$Parameter,
   levels = c(
-    "Net_Mineralization", "Soil_NH4N",
+    "Net_Nitrification", "Soil_NH4N", "Net_Mineralization", "Soil_NO3N",
     
     "AOA", "AOB", "nosZ", 
     
@@ -293,9 +293,9 @@ ggplot(
   theme(
     axis.title.y = element_blank(),
     legend.position = "bottom"
-  ) +
-  guides(color = guide_legend(nrow = 2, byrow = TRUE)) +
-  guides(linetype = guide_legend(nrow = 2))
+  ) #+
+  # guides(color = guide_legend(nrow = 2, byrow = TRUE)) #+
+  # guides(linetype = guide_legend(nrow = 2))
 
 ggsave(
   filename = file.path(getwd(), "figs", "2020_vs_2021_MAIN.pdf"), 
