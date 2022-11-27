@@ -29,12 +29,26 @@ eea <- subset(
     metadata, 
     c(
       "OM_percent", "Moisture_percent",
-      "BG_gSoil", "NAG_gSoil", "AP_gSoil", 
+      # "BG_gSoil", "NAG_gSoil", "AP_gSoil", 
           "ln(BG)_gSoil", "ln(NAG)_gSoil", "ln(AP)_gSoil", 
           "ln(BG):ln(NAG)_gSoil", "ln(BG):ln(AP)_gSoil", 
-      "BG_gOM", "NAG_gOM", "AP_gOM", 
+      # "BG_gOM", "NAG_gOM", "AP_gOM", 
           "ln(BG)_gOM", "ln(NAG)_gOM", "ln(AP)_gOM", 
           "ln(BG):ln(NAG)_gOM", "ln(BG):ln(AP)_gOM"
+    )
+  )
+)
+datmain <- subset(
+  dat,
+  select = c(
+    metadata,
+    c(
+      "Net_Mineralization", "Soil_NH4N",
+      
+      "AOA", "AOB", "nosZ", 
+      
+      "ln(BG)_gSoil", "ln(NAG)_gSoil", "ln(AP)_gSoil", 
+      "ln(BG):ln(NAG)_gSoil", "ln(BG):ln(AP)_gSoil"
     )
   )
 )
@@ -56,6 +70,12 @@ eea <- pivot_longer(
   cols = names(eea)[-c(1:9)], 
   names_to = "Parameter"
 )
+datmain <- pivot_longer(
+  data = datmain, 
+  cols = names(datmain)[-c(1:9)], 
+  names_to = "Parameter"
+)
+  
 
 # order parameters according to how they need to be displayed
 qpcr$Parameter <- factor(
@@ -69,13 +89,25 @@ NitMin$Parameter <- factor(
 eea$Parameter <- factor(
   eea$Parameter, 
   levels = c(
-    "OM_percent", "Moisture_percent",
-    "BG_gSoil", "NAG_gSoil", "AP_gSoil", 
+    "OM_percent", 
+    # "BG_gSoil", "NAG_gSoil", "AP_gSoil", 
         "ln(BG)_gSoil", "ln(NAG)_gSoil", "ln(AP)_gSoil", 
         "ln(BG):ln(NAG)_gSoil", "ln(BG):ln(AP)_gSoil", 
-    "BG_gOM", "NAG_gOM", "AP_gOM", 
+    "Moisture_percent",
+    # "BG_gOM", "NAG_gOM", "AP_gOM", 
         "ln(BG)_gOM", "ln(NAG)_gOM", "ln(AP)_gOM", 
         "ln(BG):ln(NAG)_gOM", "ln(BG):ln(AP)_gOM"
+  )
+)
+datmain$Parameter <- factor(
+  datmain$Parameter,
+  levels = c(
+    "Net_Mineralization", "Soil_NH4N",
+    
+    "AOA", "AOB", "nosZ", 
+    
+    "ln(BG)_gSoil", "ln(NAG)_gSoil", "ln(AP)_gSoil", 
+    "ln(BG):ln(NAG)_gSoil", "ln(BG):ln(AP)_gSoil"
   )
 )
 
@@ -83,6 +115,7 @@ eea$Parameter <- factor(
 qpcr <- qpcr %>% drop_na(value)
 NitMin <- NitMin %>% drop_na(value) 
 eea <- eea %>% drop_na(value) 
+datmain <- datmain %>% drop_na(value)
 
 # create boxplots ---------------------------------------------------------
 
@@ -118,10 +151,11 @@ eea <- eea %>% drop_na(value)
     geom_boxplot() +
     geom_jitter(aes(shape = Year), width = 0.2, alpha = 0.5) +
     # facet_grid(Parameter ~ ., scales = "free_y") + 
-    facet_wrap(Parameter ~ ., scales = "free_y", nrow = 2) +
+    facet_wrap(Parameter ~., scales = "free_y", ncol = 2, dir = "v") +
     theme(
       legend.position = "bottom", 
-      axis.title.y = element_blank()
+      axis.title.y = element_blank(), 
+      axis.text.x = element_text(size = rel(0.85))
     ) 
 )
 
@@ -136,10 +170,12 @@ eea <- eea %>% drop_na(value)
     theme_bw() +
     geom_boxplot() +
     geom_jitter(aes(shape = Year), width = 0.2, alpha = 0.5) +
-    facet_grid(Parameter ~ ., scales = "free_y") + 
+    # facet_grid(Parameter~., scales = "free_y") +
+    facet_wrap(Parameter~., scales = "free_y", ncol = 2, dir = "v") +
     theme(
       legend.position = "bottom", 
-      axis.title.y = element_blank()
+      axis.title.y = element_blank(), 
+      axis.text.x = element_text(size = rel(0.85))
     ) 
 )
 
@@ -152,11 +188,37 @@ ggsave(
 ggsave(
   plot = pnitmin, 
   filename = file.path(getwd(), "figs", "boxplot_NitMin.pdf"), 
-  width = 6, height = 8, units = "in"
+  # width = 6, height = 8, units = "in"
+  width = 6, height = 6, units = "in"
 )
 ggsave(
   plot = peea, 
   filename = file.path(getwd(), "figs", "boxplot_EEA.pdf"), 
   # width = 6, height = 6, units = "in"
-  width = 6, height = 18*2, units = "in"
+  width = 6, height = 10, units = "in"
+)
+
+# main text figures -------------------------------------------------------
+ggplot(
+  data = datmain, 
+  aes(
+    x = Treatment_Group, 
+    y = value, 
+    color = Tillage
+  )
+) +
+  theme_bw() +
+  geom_boxplot() +
+  geom_jitter(aes(shape = Year), width = 0.2, alpha = 0.5) +
+  # facet_grid(Parameter~., scales = "free_y") +
+  facet_wrap(Parameter~., scales = "free_y", ncol = 2, dir = "v") +
+  theme(
+    legend.position = "bottom", 
+    axis.title.y = element_blank(), 
+    axis.text.x = element_text(size = rel(0.85))
+  ) 
+
+ggsave(
+  filename = file.path(getwd(), "figs", "boxplot_MAIN.pdf"), 
+  width = 6.5, height = 10, units = "in"
 )
