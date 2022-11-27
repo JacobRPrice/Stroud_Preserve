@@ -30,9 +30,11 @@ eea <- subset(
     c(
       "OM_percent", "Moisture_percent",
       "BG_gSoil", "NAG_gSoil", "AP_gSoil", 
-      "ln(BG)_gSoil", "ln(NAG)_gSoil", "ln(AP)_gSoil", "ln(BG:NAG)_gSoil", "ln(BG:AP)_gSoil", 
+          "ln(BG)_gSoil", "ln(NAG)_gSoil", "ln(AP)_gSoil", 
+          "ln(BG):ln(NAG)_gSoil", "ln(BG):ln(AP)_gSoil", 
       "BG_gOM", "NAG_gOM", "AP_gOM", 
-      "ln(BG)_gOM", "ln(NAG)_gOM", "ln(AP)_gOM", "ln(BG:NAG)_gOM", "ln(BG:AP)_gOM"
+          "ln(BG)_gOM", "ln(NAG)_gOM", "ln(AP)_gOM", 
+          "ln(BG):ln(NAG)_gOM", "ln(BG):ln(AP)_gOM"
     )
   )
 )
@@ -69,9 +71,11 @@ eea$Parameter <- factor(
   levels = c(
     "OM_percent", "Moisture_percent",
     "BG_gSoil", "NAG_gSoil", "AP_gSoil", 
-    "ln(BG)_gSoil", "ln(NAG)_gSoil", "ln(AP)_gSoil", "ln(BG:NAG)_gSoil", "ln(BG:AP)_gSoil", 
+        "ln(BG)_gSoil", "ln(NAG)_gSoil", "ln(AP)_gSoil", 
+        "ln(BG):ln(NAG)_gSoil", "ln(BG):ln(AP)_gSoil", 
     "BG_gOM", "NAG_gOM", "AP_gOM", 
-    "ln(BG)_gOM", "ln(NAG)_gOM", "ln(AP)_gOM", "ln(BG:NAG)_gOM", "ln(BG:AP)_gOM"
+        "ln(BG)_gOM", "ln(NAG)_gOM", "ln(AP)_gOM", 
+        "ln(BG):ln(NAG)_gOM", "ln(BG):ln(AP)_gOM"
   )
 )
 
