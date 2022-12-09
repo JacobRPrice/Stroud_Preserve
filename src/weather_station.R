@@ -18,7 +18,6 @@ filels <- lapply(
   }
 )
 
-
 # cleanup variable names --------------------------------------------------
 str(filels[[1]])
 str(filels[[2]])
@@ -177,9 +176,9 @@ ggplot(
 ) +
   theme_bw() +
   geom_hline(yintercept = 0) +
-  # geom_point(alpha = 0.25) +
+  geom_point(alpha = 0.25) +
   # geom_smooth() +
-  geom_smooth(se = FALSE) +
+  geom_smooth(se = FALSE, method = "loess") +
   coord_cartesian(
     # ylim = c(0, max(raindat$Daily_Precip)),
     # ylim = c(0, 10),
@@ -193,7 +192,7 @@ ggplot(
 
 ggsave(
   filename = file.path(getwd(), "figs", "weatherstation_rain_smooth.pdf"),
-  width = 3, height = 4, units = "in"
+  width = 3, height = 7, units = "in"
 )
 
 # export precipitation summary --------------------------------------------
