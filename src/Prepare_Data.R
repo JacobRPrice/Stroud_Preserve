@@ -46,10 +46,6 @@ treats$ID_Sys_EP <- as.character(treats$ID_Sys_EP)
 
 # factor treatments
 treats
-treats$Fertility_Source <- factor(
-  treats$Fertility_Source,
-  levels = c("Synthetic Fertilizer", "Legume")
-)
 treats$Management_System <- factor(
   treats$Management_System,
   levels = c("Conventional", "Organic")
@@ -77,38 +73,30 @@ treats$Treatment_Group <- with(
   )
 )
 levels(treats$Treatment_Group)
-# levels(treats$Treatment_Group) <- c(
-#   "Con_NC_T", 
-#   "Con_CC_T", 
-#   "Con_CC_RT", 
-#   "Org_CC_T", 
-#   "Org_CC_RT"
+
+str(treats)
+
+# # Create scaffold for data ------------------------------------------------
+# str(sampledata)
+# str(treats)
+# 
+# dat <- left_join(
+#   sampledata, 
+#   treats, 
+#   by = c("ID_Sys_EP")
 # )
-# levels(treats$Treatment_Group)
-
-str(treats)
-
-# Create scaffold for data ------------------------------------------------
-str(sampledata)
-str(treats)
-
-dat <- left_join(
-  sampledata, 
-  treats, 
-  by = c("ID_Sys_EP")
-)
-
-dat <- unique(
-  subset(
-    dat, 
-    select = c(Date, Site, Management_System, Tillage, Cover_Crop, Treatment_Group)
-  )
-)
-
-dat <- as_tibble(dat)
-
-str(dat)
-table(dat$Date, dat$Site)
+# 
+# dat <- unique(
+#   subset(
+#     dat, 
+#     select = c(Date, Site, Management_System, Tillage, Cover_Crop, Treatment_Group)
+#   )
+# )
+# 
+# dat <- as_tibble(dat)
+# 
+# str(dat)
+# table(dat$Date, dat$Site)
 
 # qPCR --------------------------------------------------------------------
 (data_files <- list.files(
@@ -210,22 +198,22 @@ str(qpcr)
 # Confirm OT_11 on 9/15/21 resulted in NA's 
 qpcr[which(is.na(qpcr$copy_number)),]
 
-# qPCR: append ------------------------------------------------------------
-str(dat)
-str(qpcr)
-
-qpcr_wide <- qpcr %>% tidyr::pivot_wider(
-  names_from = Target, 
-  values_from = copy_number
-)
-str(qpcr_wide)
-
-dat <- full_join(
-  x = dat, 
-  y = qpcr_wide,
-  by = c("Date", "Site")
-)
-str(dat)
+# # qPCR: append ------------------------------------------------------------
+# str(dat)
+# str(qpcr)
+# 
+# qpcr_wide <- qpcr %>% tidyr::pivot_wider(
+#   names_from = Target, 
+#   values_from = copy_number
+# )
+# str(qpcr_wide)
+# 
+# dat <- full_join(
+#   x = dat, 
+#   y = qpcr_wide,
+#   by = c("Date", "Site")
+# )
+# str(dat)
 
 # Soil --------------------------------------------------------------------
 soil <- read.csv(
@@ -259,23 +247,23 @@ soil <- soil %>% group_by(Date, Site, parameter) %>% summarize(
 ) %>% ungroup()
 str(soil)
 
-# Soil: append ------------------------------------------------------------
-str(dat)
-str(soil)
-
-# get soil into wide format
-soil_wide <- soil %>% tidyr::pivot_wider(
-  names_from = parameter,
-  values_from = mean_value
-)
-str(soil_wide)
-
-dat <- full_join(
-  x = dat, 
-  y = soil_wide, 
-  by = c("Site", "Date")
-)
-str(dat)
+# # Soil: append ------------------------------------------------------------
+# str(dat)
+# str(soil)
+# 
+# # get soil into wide format
+# soil_wide <- soil %>% tidyr::pivot_wider(
+#   names_from = parameter,
+#   values_from = mean_value
+# )
+# str(soil_wide)
+# 
+# dat <- full_join(
+#   x = dat, 
+#   y = soil_wide, 
+#   by = c("Site", "Date")
+# )
+# str(dat)
 
 # EEA ---------------------------------------------------------------------
 eea <- read.csv(
@@ -314,22 +302,82 @@ eea <- eea %>% group_by(Substrate, Site, Date) %>% dplyr::summarise(
 
 str(eea)
 
-# EEA: append -------------------------------------------------------------
-str(dat)
+# # EEA: append -------------------------------------------------------------
+# str(dat)
+# str(eea)
+# 
+# # get soil into wide format
+# eea_wide <- eea %>% tidyr::pivot_wider(
+#   names_from = Substrate,
+#   values_from = c(EEA_umol_hr_gdrysoil, EEA_umol_hr_gOM)
+# )
+# str(eea_wide)
+# 
+# dat <- full_join(
+#   x = dat,
+#   y = eea_wide, 
+#   by = c("Site", "Date")
+# )
+
+
+# merge all datasets together ---------------------------------------------
+ls()
+str(sampledata)
+str(treats)
+str(qpcr)
+str(soil)
 str(eea)
 
-# get soil into wide format
+# convert to wide formats
+qpcr_wide <- qpcr %>% tidyr::pivot_wider(
+  names_from = Target, 
+  values_from = copy_number
+)
+
+soil_wide <- soil %>% tidyr::pivot_wider(
+  names_from = parameter, 
+  values_from = mean_value
+)
+
 eea_wide <- eea %>% tidyr::pivot_wider(
-  names_from = Substrate,
+  names_from = Substrate, 
   values_from = c(EEA_umol_hr_gdrysoil, EEA_umol_hr_gOM)
 )
+
+str(qpcr_wide)
+str(soil_wide)
 str(eea_wide)
 
+# join data
 dat <- full_join(
-  x = dat,
-  y = eea_wide, 
-  by = c("Site", "Date")
+  qpcr_wide, 
+  soil_wide, 
+  by = c("Date", "Site")
 )
+dat <- full_join(
+  dat, 
+  eea_wide, 
+  by = c("Date", "Site")
+)
+str(dat)
+
+# join with treatment info
+str(treats)
+dat <- left_join(
+  treats, 
+  dat, 
+  by = "Site"
+)
+dat <- as_tibble(dat)
+
+# remove unneeded columns
+dat <- subset(
+  dat, 
+  select = -c(ID_Sys_EP, ID_Sys, ID_EP)
+)
+
+# sort dataframe
+dat <- dat[order(dat$Date),]
 
 # Make nicer names --------------------------------------------------------
 str(dat)
@@ -371,9 +419,27 @@ dat$"ln(BG):ln(AP)_gOM" <- dat$`ln(BG)_gOM`/dat$`ln(AP)_gOM`
 # reorganize data ---------------------------------------------------------
 names(dat)
 # (relocate(dat, c(Year, Month, Day), .after = Treatment_Group))
-dat <- dat %>% relocate(Day, .after = Treatment_Group) %>% 
-  relocate(Month, .after = Treatment_Group) %>% 
-  relocate(Year, .after = Treatment_Group)
+
+dat <- dat %>% 
+  relocate(
+    c(Date, Site),
+    .before = Management_System
+  ) %>% 
+    relocate(
+      c(Year, Month, Day), .after = Treatment_Group
+    )
+
+# dat <- dat %>% 
+#   relocate(
+#     c(
+#       Management_System, Tillage, Cover_Crop, Treatment_Group, 
+#       Year, Month, Day
+#     ),
+#     .after = Site)
+
+# dat <- dat %>% relocate(Day, .after = Treatment_Group) %>% 
+#   relocate(Month, .after = Treatment_Group) %>% 
+#   relocate(Year, .after = Treatment_Group)
 names(dat)
 
 # save to disk ------------------------------------------------------------
