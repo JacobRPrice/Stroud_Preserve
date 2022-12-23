@@ -403,31 +403,46 @@ dat$Year <- as.factor(dat$Year)
 dat$Month <- lubridate::month(dat$Date)
 dat$Day <- lubridate::yday(dat$Date)
 
-# calculate eea ratios ----------------------------------------------------
-dat$"ln(BG)_gSoil" <- log(dat$BG_gSoil)
-dat$"ln(NAG)_gSoil" <- log(dat$NAG_gSoil)
-dat$"ln(AP)_gSoil" <- log(dat$AP_gSoil)
-dat$"ln(BG):ln(NAG)_gSoil" <- dat$`ln(BG)_gSoil`/dat$`ln(NAG)_gSoil`
-dat$"ln(BG):ln(AP)_gSoil" <- dat$`ln(BG)_gSoil`/dat$`ln(AP)_gSoil`
+# calculate values --------------------------------------------------------
+# dat$"ln(BG)_gSoil" <- log(dat$BG_gSoil)
+# dat$"ln(NAG)_gSoil" <- log(dat$NAG_gSoil)
+# dat$"ln(AP)_gSoil" <- log(dat$AP_gSoil)
+# dat$"ln(BG):ln(NAG)_gSoil" <- dat$`ln(BG)_gSoil`/dat$`ln(NAG)_gSoil`
+# dat$"ln(BG):ln(AP)_gSoil" <- dat$`ln(BG)_gSoil`/dat$`ln(AP)_gSoil`
+# 
+# dat$"ln(BG)_gOM" <- log(dat$BG_gOM)
+# dat$"ln(NAG)_gOM" <- log(dat$NAG_gOM)
+# dat$"ln(AP)_gOM" <- log(dat$AP_gOM)
+# dat$"ln(BG):ln(NAG)_gOM" <- dat$`ln(BG)_gOM`/dat$`ln(NAG)_gOM`
+# dat$"ln(BG):ln(AP)_gOM" <- dat$`ln(BG)_gOM`/dat$`ln(AP)_gOM`
 
-dat$"ln(BG)_gOM" <- log(dat$BG_gOM)
-dat$"ln(NAG)_gOM" <- log(dat$NAG_gOM)
-dat$"ln(AP)_gOM" <- log(dat$AP_gOM)
-dat$"ln(BG):ln(NAG)_gOM" <- dat$`ln(BG)_gOM`/dat$`ln(NAG)_gOM`
-dat$"ln(BG):ln(AP)_gOM" <- dat$`ln(BG)_gOM`/dat$`ln(AP)_gOM`
+dat$"log(AOA)" <- log10(dat$AOA)
+dat$"log(AOB)" <- log10(dat$AOB)
+dat$"log(nosZ)" <- log10(dat$nosZ)
+
+dat$"ln(BG)" <- log(dat$BG_gOM)
+dat$"ln(NAG)" <- log(dat$NAG_gOM)
+dat$"ln(AP)" <- log(dat$AP_gOM)
+dat$"ln(NAG):ln(BG)" <- log(dat$NAG_gOM)/log(dat$BG_gOM)
+dat$"ln(NAG):ln(AP)" <- log(dat$NAG_gOM)/log(dat$AP_gOM)
+
+# remove unneeded vars ----------------------------------------------------
+dat <- dat %>% 
+  select(-c(BG_gSoil, NAG_gSoil, AP_gSoil, OM_percent, Moisture_percent)) %>% 
+  rename(
+    BG = BG_gOM, 
+    NAG = NAG_gOM, 
+    AP = AP_gOM
+  )
 
 # reorganize data ---------------------------------------------------------
 names(dat)
 # (relocate(dat, c(Year, Month, Day), .after = Treatment_Group))
 
 dat <- dat %>% 
-  relocate(
-    c(Date, Site),
-    .before = Management_System
-  ) %>% 
-    relocate(
-      c(Year, Month, Day), .after = Treatment_Group
-    )
+  relocate(c(Date, Site), .before = Management_System) %>% 
+  relocate(c(Year, Month, Day), .after = Treatment_Group) %>% 
+  relocate(c("log(AOA)", "log(AOB)", "log(nosZ)"), .after = nosZ)
 
 # dat <- dat %>% 
 #   relocate(
