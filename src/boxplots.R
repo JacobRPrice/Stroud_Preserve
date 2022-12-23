@@ -28,13 +28,9 @@ eea <- subset(
   select = c(
     metadata, 
     c(
-      "OM_percent", "Moisture_percent",
-      # "BG_gSoil", "NAG_gSoil", "AP_gSoil", 
-          "ln(BG)_gSoil", "ln(NAG)_gSoil", "ln(AP)_gSoil", 
-          "ln(BG):ln(NAG)_gSoil", "ln(BG):ln(AP)_gSoil", 
-      # "BG_gOM", "NAG_gOM", "AP_gOM", 
-          "ln(BG)_gOM", "ln(NAG)_gOM", "ln(AP)_gOM", 
-          "ln(BG):ln(NAG)_gOM", "ln(BG):ln(AP)_gOM"
+      "BG", "NAG", "AP",
+      "ln(BG)", "ln(NAG)", "ln(AP)", 
+      "NAG:BG", "NAG:AP"
     )
   )
 )
@@ -47,8 +43,9 @@ datmain <- subset(
       
       "AOA", "AOB", "nosZ", 
       
-      "ln(BG)_gSoil", "ln(NAG)_gSoil", "ln(AP)_gSoil", 
-      "ln(BG):ln(NAG)_gSoil", "ln(BG):ln(AP)_gSoil"
+      "BG", "NAG", "AP",
+      "ln(BG)", "ln(NAG)", "ln(AP)", 
+      "NAG:BG", "NAG:AP"
     )
   )
 )
@@ -89,14 +86,9 @@ NitMin$Parameter <- factor(
 eea$Parameter <- factor(
   eea$Parameter, 
   levels = c(
-    "OM_percent", 
-    # "BG_gSoil", "NAG_gSoil", "AP_gSoil", 
-        "ln(BG)_gSoil", "ln(NAG)_gSoil", "ln(AP)_gSoil", 
-        "ln(BG):ln(NAG)_gSoil", "ln(BG):ln(AP)_gSoil", 
-    "Moisture_percent",
-    # "BG_gOM", "NAG_gOM", "AP_gOM", 
-        "ln(BG)_gOM", "ln(NAG)_gOM", "ln(AP)_gOM", 
-        "ln(BG):ln(NAG)_gOM", "ln(BG):ln(AP)_gOM"
+    "BG", "NAG", "AP",
+    "ln(BG)", "ln(NAG)", "ln(AP)", 
+    "NAG:BG", "NAG:AP"
   )
 )
 datmain$Parameter <- factor(
@@ -106,8 +98,9 @@ datmain$Parameter <- factor(
     
     "AOA", "AOB", "nosZ", 
     
-    "ln(BG)_gSoil", "ln(NAG)_gSoil", "ln(AP)_gSoil", 
-    "ln(BG):ln(NAG)_gSoil", "ln(BG):ln(AP)_gSoil"
+    "BG", "NAG", "AP",
+    "ln(BG)", "ln(NAG)", "ln(AP)", 
+    "NAG:BG", "NAG:AP"
   )
 )
 
