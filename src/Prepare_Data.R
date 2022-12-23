@@ -423,8 +423,8 @@ dat$"log(nosZ)" <- log10(dat$nosZ)
 dat$"ln(BG)" <- log(dat$BG_gOM)
 dat$"ln(NAG)" <- log(dat$NAG_gOM)
 dat$"ln(AP)" <- log(dat$AP_gOM)
-dat$"ln(NAG):ln(BG)" <- log(dat$NAG_gOM)/log(dat$BG_gOM)
-dat$"ln(NAG):ln(AP)" <- log(dat$NAG_gOM)/log(dat$AP_gOM)
+dat$"NAG:BG" <- log(dat$NAG_gOM)/log(dat$BG_gOM)
+dat$"NAG:AP" <- log(dat$NAG_gOM)/log(dat$AP_gOM)
 
 # remove unneeded vars ----------------------------------------------------
 dat <- dat %>% 
