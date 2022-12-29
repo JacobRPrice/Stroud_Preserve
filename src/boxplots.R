@@ -28,7 +28,7 @@ eea <- subset(
   select = c(
     metadata, 
     c(
-      "BG", "NAG", "AP",
+      # "BG", "NAG", "AP",
       "ln(BG)", "ln(NAG)", "ln(AP)", 
       "NAG:BG", "NAG:AP"
     )
@@ -41,9 +41,10 @@ datmain <- subset(
     c(
       "Net_Nitrification", "Soil_NH4N", "Net_Mineralization", "Soil_NO3N",
       
-      "AOA", "AOB", "nosZ", 
+      # "AOA", "AOB", "nosZ", 
+      "log(AOA)", "log(AOB)", "log(nosZ)", 
       
-      "BG", "NAG", "AP",
+      # "BG", "NAG", "AP",
       "ln(BG)", "ln(NAG)", "ln(AP)", 
       "NAG:BG", "NAG:AP"
     )
@@ -86,7 +87,7 @@ NitMin$Parameter <- factor(
 eea$Parameter <- factor(
   eea$Parameter, 
   levels = c(
-    "BG", "NAG", "AP",
+    # "BG", "NAG", "AP",
     "ln(BG)", "ln(NAG)", "ln(AP)", 
     "NAG:BG", "NAG:AP"
   )
@@ -96,9 +97,10 @@ datmain$Parameter <- factor(
   levels = c(
     "Net_Nitrification", "Soil_NH4N", "Net_Mineralization", "Soil_NO3N",
     
-    "AOA", "AOB", "nosZ", 
+    # "AOA", "AOB", "nosZ", 
+    "log(AOA)", "log(AOB)", "log(nosZ)", 
     
-    "BG", "NAG", "AP",
+    # "BG", "NAG", "AP",
     "ln(BG)", "ln(NAG)", "ln(AP)", 
     "NAG:BG", "NAG:AP"
   )
@@ -111,18 +113,17 @@ eea <- eea %>% drop_na(value)
 datmain <- datmain %>% drop_na(value)
 
 # create boxplots ---------------------------------------------------------
-
 (pqpcr <- ggplot(
   data = qpcr, 
   aes(
     x = Treatment_Group, 
     y = value, 
-    color = Tillage
+    color = Year
   )
 ) +
   theme_bw() +
   geom_boxplot() +
-  geom_jitter(aes(shape = Year), width = 0.2, alpha = 0.5) +
+  geom_point(position = position_jitterdodge(jitter.height = 0)) +
   facet_grid(Parameter ~ ., scales = "free_y") + 
   theme(
     legend.position = "bottom", 
@@ -136,19 +137,17 @@ datmain <- datmain %>% drop_na(value)
   aes(
     x = Treatment_Group, 
     y = value, 
-    color = Tillage
+    color = Year
   )
 ) +
     theme_bw() +
     geom_hline(yintercept = 0) +
     geom_boxplot() +
-    geom_jitter(aes(shape = Year), width = 0.2, alpha = 0.5) +
-    # facet_grid(Parameter ~ ., scales = "free_y") + 
-    facet_wrap(Parameter ~., scales = "free_y", ncol = 2, dir = "v") +
+    geom_point(position = position_jitterdodge(jitter.height = 0)) +
+    facet_grid(Parameter ~ ., scales = "free_y") + 
     theme(
       legend.position = "bottom", 
-      axis.title.y = element_blank(), 
-      axis.text.x = element_text(size = rel(0.85))
+      axis.title.y = element_blank()
     ) 
 )
 
@@ -157,26 +156,25 @@ datmain <- datmain %>% drop_na(value)
   aes(
     x = Treatment_Group, 
     y = value, 
-    color = Tillage
+    color = Year
   )
 ) +
     theme_bw() +
     geom_boxplot() +
-    geom_jitter(aes(shape = Year), width = 0.2, alpha = 0.5) +
-    # facet_grid(Parameter~., scales = "free_y") +
-    facet_wrap(Parameter~., scales = "free_y", ncol = 2, dir = "v") +
+    geom_point(position = position_jitterdodge(jitter.height = 0)) +
+    facet_grid(Parameter ~ ., scales = "free_y") + 
     theme(
       legend.position = "bottom", 
       axis.title.y = element_blank(), 
       axis.text.x = element_text(size = rel(0.85))
-    ) 
+    )  
 )
 
 # save figures ------------------------------------------------------------
 ggsave(
   plot = pqpcr, 
   filename = file.path(getwd(), "figs", "boxplot_qPCR.pdf"), 
-  width = 6, height = 3*2, units = "in"
+  width = 6, height = 6, units = "in"
 )
 ggsave(
   plot = pnitmin, 
@@ -188,7 +186,7 @@ ggsave(
   plot = peea, 
   filename = file.path(getwd(), "figs", "boxplot_EEA.pdf"), 
   # width = 6, height = 6, units = "in"
-  width = 6, height = 10, units = "in"
+  width = 6, height = 8, units = "in"
 )
 
 # main text figures -------------------------------------------------------
@@ -197,21 +195,19 @@ ggplot(
   aes(
     x = Treatment_Group, 
     y = value, 
-    color = Tillage
+    color = Year
   )
 ) +
   theme_bw() +
   geom_boxplot() +
-  geom_jitter(aes(shape = Year), width = 0.2, alpha = 0.5) +
-  # facet_grid(Parameter~., scales = "free_y") +
+  geom_point(position = position_jitterdodge(jitter.height = 0)) +
   facet_wrap(Parameter~., scales = "free_y", ncol = 2, dir = "v") +
   theme(
     legend.position = "bottom", 
-    axis.title.y = element_blank(), 
-    axis.text.x = element_text(size = rel(0.85))
+    axis.title.y = element_blank()
   ) 
 
 ggsave(
   filename = file.path(getwd(), "figs", "boxplot_MAIN.pdf"), 
-  width = 6.5, height = 10, units = "in"
+  width = 18, height = 24, units = "cm"
 )
