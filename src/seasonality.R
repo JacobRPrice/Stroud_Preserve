@@ -6,53 +6,74 @@ library(ggplot2)
 dat <- readRDS(file.path(getwd(), "/data/", "dat.RDS"))
 
 # prepare data ------------------------------------------------------------
-# restructure data
-names(dat)
-str(dat)
-dat <- pivot_longer(
-  data = dat, 
-  cols = names(dat)[-c(1:9)],
-  names_to = "Parameter"
-)
-str(dat)
-
-# remove NA entries
-dim(dat)
-dat <- dat %>% drop_na(value) 
-dim(dat)
 
 # subset by analysis type
+metadata <- c("Date", "Site", "Management_System" , "Tillage", "Cover_Crop", "Treatment_Group", "Year", "Month", "Day")
 qpcr <- subset(
-  dat,
-  Parameter %in% c("AOA", "AOB", "nosZ")
+  dat, 
+  select = c(
+    metadata, 
+    c("AOA", "AOB", "nosZ")
+  )
 )
 NitMin <- subset(
   dat,
-  Parameter %in% c("Net_Nitrification", "Soil_NH4N", "Net_Mineralization", "Soil_NO3N")
+  select = c(
+    metadata, 
+    c("Net_Nitrification", "Soil_NH4N", "Net_Mineralization", "Soil_NO3N")
+  )
 )
 eea <- subset(
   dat,
-  Parameter %in% c(
-    "OM_percent", "Moisture_percent",
-    # "BG_gSoil", "NAG_gSoil", "AP_gSoil", 
-        "ln(BG)_gSoil", "ln(NAG)_gSoil", "ln(AP)_gSoil", 
-        "ln(BG):ln(NAG)_gSoil", "ln(BG):ln(AP)_gSoil", 
-    # "BG_gOM", "NAG_gOM", "AP_gOM", 
-        "ln(BG)_gOM", "ln(NAG)_gOM", "ln(AP)_gOM", 
-        "ln(BG):ln(NAG)_gOM", "ln(BG):ln(AP)_gOM"
+  select = c(
+    metadata, 
+    c(
+      # "BG", "NAG", "AP",
+      "ln(BG)", "ln(NAG)", "ln(AP)", 
+      "NAG:BG", "NAG:AP"
+    )
   )
 )
 datmain <- subset(
-  dat, 
-  Parameter %in% c(
-    "Net_Nitrification", "Soil_NH4N", "Net_Mineralization", "Soil_NO3N",
-    
-    "ln(BG)_gSoil", "ln(NAG)_gSoil", "ln(AP)_gSoil", 
-    "ln(BG):ln(NAG)_gSoil", "ln(BG):ln(AP)_gSoil", 
-    
-    "AOA", "AOB", "nosZ"
+  dat,
+  select = c(
+    metadata,
+    c(
+      "Net_Nitrification", "Soil_NH4N", "Net_Mineralization", "Soil_NO3N",
+      
+      # "AOA", "AOB", "nosZ", 
+      "log(AOA)", "log(AOB)", "log(nosZ)", 
+      
+      # "BG", "NAG", "AP",
+      "ln(BG)", "ln(NAG)", "ln(AP)", 
+      "NAG:BG", "NAG:AP"
+    )
   )
 )
+
+# restructure data
+names(qpcr)
+qpcr <- pivot_longer(
+  data = qpcr, 
+  cols = names(qpcr)[-c(1:9)], 
+  names_to = "Parameter"
+)
+NitMin <- pivot_longer(
+  data = NitMin, 
+  cols = names(NitMin)[-c(1:9)], 
+  names_to = "Parameter"
+)
+eea <- pivot_longer(
+  data = eea, 
+  cols = names(eea)[-c(1:9)], 
+  names_to = "Parameter"
+)
+datmain <- pivot_longer(
+  data = datmain, 
+  cols = names(datmain)[-c(1:9)], 
+  names_to = "Parameter"
+)
+
 
 # order parameters according to how they need to be displayed
 qpcr$Parameter <- factor(
@@ -66,116 +87,30 @@ NitMin$Parameter <- factor(
 eea$Parameter <- factor(
   eea$Parameter, 
   levels = c(
-    "OM_percent", 
-    # "BG_gSoil", "NAG_gSoil", "AP_gSoil", 
-        "ln(BG)_gSoil", "ln(NAG)_gSoil", "ln(AP)_gSoil", 
-        "ln(BG):ln(NAG)_gSoil", "ln(BG):ln(AP)_gSoil", 
-    "Moisture_percent",
-    # "BG_gOM", "NAG_gOM", "AP_gOM", 
-        "ln(BG)_gOM", "ln(NAG)_gOM", "ln(AP)_gOM", 
-        "ln(BG):ln(NAG)_gOM", "ln(BG):ln(AP)_gOM"
+    # "BG", "NAG", "AP",
+    "ln(BG)", "ln(NAG)", "ln(AP)", 
+    "NAG:BG", "NAG:AP"
   )
 )
-
 datmain$Parameter <- factor(
   datmain$Parameter,
   levels = c(
     "Net_Nitrification", "Soil_NH4N", "Net_Mineralization", "Soil_NO3N",
     
-    "AOA", "AOB", "nosZ", 
+    # "AOA", "AOB", "nosZ", 
+    "log(AOA)", "log(AOB)", "log(nosZ)", 
     
-    "ln(BG)_gSoil", "ln(NAG)_gSoil", "ln(AP)_gSoil", 
-    "ln(BG):ln(NAG)_gSoil", "ln(BG):ln(AP)_gSoil"
+    # "BG", "NAG", "AP",
+    "ln(BG)", "ln(NAG)", "ln(AP)", 
+    "NAG:BG", "NAG:AP"
   )
 )
 
-# plot --------------------------------------------------------------------
-(pqpcr <- ggplot(
-  data = qpcr, 
-  aes(
-    x = Day,
-    y = value, 
-    group = interaction(Year, Treatment_Group),
-    color = Year
-  )
-) +
-  theme_bw() +
-  geom_point() +
-  geom_smooth(se = FALSE) +
-  facet_grid(Parameter~., scales = "free_y") +
-  scale_x_continuous(limits = c(60,340)) + 
-  scale_y_continuous(trans = "log10") + 
-  # ylab("Gene Copies / g Soil (Log10 Scaled)") +
-  theme(
-    axis.title.y = element_blank(),
-    legend.position = "bottom"
-  )
-)
-
-(pnitmin <- ggplot(
-  data = NitMin, 
-  aes(
-    x = Day,
-    y = value, 
-    group = interaction(Year, Treatment_Group),
-    color = Year
-  )
-) +
-    theme_bw() +
-    geom_hline(yintercept = 0) +
-    geom_point() +
-    geom_smooth(se = FALSE) +
-    # facet_grid(Parameter~., scales = "free_y") +
-    facet_wrap(Parameter ~., scales = "free_y", ncol = 2, dir = "v") +
-    scale_x_continuous(limits = c(60,340)) + 
-    theme(
-      axis.title.y = element_blank(), 
-      legend.position = "bottom"
-    )
-)
-
-(peea <- ggplot(
-  data = eea, 
-  aes(
-    x = Day,
-    y = value, 
-    group = interaction(Year, Treatment_Group),
-    color = Year
-  )
-) +
-    theme_bw() +
-    geom_point() +
-    geom_smooth(se = FALSE) +
-    # facet_grid(Parameter~., scales = "free_y") +
-    facet_wrap(Parameter~., scales = "free_y", ncol = 2, dir = "v") +
-    scale_x_continuous(limits = c(60,340)) + 
-    theme(
-      axis.title.y = element_blank(), 
-      legend.position = "bottom"
-    )
-)
-
-ggsave(
-  plot = pqpcr,
-  filename = file.path(getwd(), "figs", "2020_vs_2021_qPCR.pdf"), 
-  # width = 6, height = 3*2, units = "in"
-  width = 6, height = 5, units = "in"
-)
-ggsave(
-  plot = pnitmin,
-  filename = file.path(getwd(), "figs", "2020_vs_2021_NitMin.pdf"), 
-  # width = 6, height = 4*2, units = "in"
-  width = 6.5, height = 6, units = "in"
-)
-ggsave(
-  plot = peea,
-  filename = file.path(getwd(), "figs", "2020_vs_2021_EEA.pdf"), 
-  # width = 6, height = 5*2, units = "in"
-  # width = 6, height = 18*2, units = "in"
-  width = 6.5, height = 10, units = "in"
-)
-
-
+# remove NA entries
+qpcr <- qpcr %>% drop_na(value)
+NitMin <- NitMin %>% drop_na(value) 
+eea <- eea %>% drop_na(value) 
+datmain <- datmain %>% drop_na(value)
 
 # supplemental plots ------------------------------------------------------
 # these plots 
@@ -194,13 +129,14 @@ ggsave(
 ) +
   theme_bw() +
   geom_point() +
-  geom_smooth(se = FALSE) +
+  geom_smooth(se = FALSE, size = 0.5) +
   facet_grid(Parameter~., scales = "free_y") +
   scale_x_continuous(limits = c(60,340)) + 
   scale_y_continuous(trans = "log10") + 
   # ylab("Gene Copies / g Soil (Log10 Scaled)") +
   theme(
-    axis.title.y = element_blank(),
+    axis.title.y = element_blank(), 
+    panel.grid.major.x = element_blank(),
     legend.position = "bottom"
   ) +
   guides(color = guide_legend(nrow = 2, byrow = TRUE)) +
@@ -219,12 +155,13 @@ ggsave(
     theme_bw() +
     geom_hline(yintercept = 0) +
     geom_point() +
-    geom_smooth(se = FALSE) +
-    # facet_grid(Parameter~., scales = "free_y") +
-    facet_wrap(Parameter ~., scales = "free_y", ncol = 2, dir = "v") +
+    geom_smooth(se = FALSE, size = 0.5) +
+    facet_grid(Parameter~., scales = "free_y") +
+    # facet_wrap(Parameter ~., scales = "free_y", ncol = 2, dir = "v") +
     scale_x_continuous(limits = c(60,340)) + 
     theme(
-      axis.title.y = element_blank(),
+      axis.title.y = element_blank(), 
+      panel.grid.major.x = element_blank(),
       legend.position = "bottom"
     ) +
     guides(color = guide_legend(nrow = 2, byrow = TRUE)) +
@@ -242,38 +179,40 @@ ggsave(
 ) +
     theme_bw() +
     geom_point() +
-    geom_smooth(se = FALSE) +
-    # facet_grid(Parameter~., scales = "free_y") +
-    facet_wrap(Parameter~., scales = "free_y", ncol = 2, dir = "v") +
+    geom_smooth(se = FALSE, size = 0.5) +
+    facet_grid(Parameter~., scales = "free_y") +
+    # facet_wrap(Parameter~., scales = "free_y", ncol = 2, dir = "v") +
     scale_x_continuous(limits = c(60,340)) + 
     theme(
-      axis.title.y = element_blank(),
+      axis.title.y = element_blank(), 
+      panel.grid.major.x = element_blank(),
       legend.position = "bottom"
     ) +
     guides(color = guide_legend(nrow = 2, byrow = TRUE)) +
     guides(linetype = guide_legend(nrow = 2))
 )
 
+
+# save figures ------------------------------------------------------------
 ggsave(
   plot = apqpcr,
-  filename = file.path(getwd(), "figs", "2020_vs_2021_qPCR_supp.pdf"), 
+  filename = file.path(getwd(), "figs", "2020_vs_2021_qPCR.pdf"), 
   # width = 6, height = 3*2, units = "in"
-  width = 6, height = 5, units = "in"
+  width = 6, height = 6, units = "in"
 )
 ggsave(
   plot = apnitmin,
-  filename = file.path(getwd(), "figs", "2020_vs_2021_NitMin_supp.pdf"), 
+  filename = file.path(getwd(), "figs", "2020_vs_2021_NitMin.pdf"), 
   # width = 6, height = 4*2, units = "in"
-  width = 6.5, height = 6, units = "in"
+  width = 6, height = 6, units = "in"
 )
 ggsave(
   plot = apeea,
-  filename = file.path(getwd(), "figs", "2020_vs_2021_EEA_supp.pdf"), 
+  filename = file.path(getwd(), "figs", "2020_vs_2021_EEA.pdf"), 
   # width = 6, height = 5*2, units = "in"
   # width = 6, height = 18*2, units = "in"
-  width = 6.5, height = 10, units = "in"
+  width = 6, height = 8, units = "in"
 )
-
 
 # main text figure --------------------------------------------------------
 ggplot(
@@ -287,11 +226,12 @@ ggplot(
 ) +
   theme_bw() +
   geom_point() +
-  geom_smooth(se = FALSE) +
+  geom_smooth(se = FALSE, size = 0.5) +
   facet_wrap(Parameter~., scales = "free_y", ncol = 2, dir = "v") +
   scale_x_continuous(limits = c(60,340)) + 
   theme(
-    axis.title.y = element_blank(),
+    axis.title.y = element_blank(), 
+    panel.grid.major.x = element_blank(),
     legend.position = "bottom"
   ) #+
   # guides(color = guide_legend(nrow = 2, byrow = TRUE)) #+
@@ -299,5 +239,5 @@ ggplot(
 
 ggsave(
   filename = file.path(getwd(), "figs", "2020_vs_2021_MAIN.pdf"), 
-  width = 6.5, height = 10, units = "in"
+  width = 18, height = 24, units = "cm"
 )
