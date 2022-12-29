@@ -271,6 +271,7 @@ addWorksheet(wb, sheet ="conv_mean")
 addWorksheet(wb, sheet ="means")
 addWorksheet(wb, sheet ="anovadf")
 addWorksheet(wb, sheet ="emmdf")
+addWorksheet(wb, sheet ="contdfY")
 addWorksheet(wb, sheet ="contdfM")
 addWorksheet(wb, sheet ="contdfT")
 addWorksheet(wb, sheet ="contdfC")
@@ -333,13 +334,13 @@ writeData(
   rowNames = TRUE, colNames = TRUE
 )
 
-# writeData(
-#   wb, 
-#   x = ttestdf,
-#   sheet = "ttestdf", 
-#   startCol = 1, startRow = 1, 
-#   rowNames = TRUE, colNames = TRUE
-# )
+writeData(
+  wb, 
+  x = contdfC,
+  sheet = "contdfC", 
+  startCol = 1, startRow = 1, 
+  rowNames = TRUE, colNames = TRUE
+)
 
 # save to file
 saveWorkbook(
