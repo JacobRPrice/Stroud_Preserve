@@ -7,7 +7,7 @@ dat_orig <- dat <- readRDS(file.path(getwd(), "/data/", "dat.RDS"))
 str(dat)
 
 dat_long <- dat %>% tidyr::pivot_longer(
-  cols = names(dat)[7:21], 
+  cols = names(dat)[10:24], 
   names_to = "Parameter", 
   values_to = "value"
 )
@@ -31,9 +31,9 @@ samples_summary <- dat_long %>% group_by(Date, Parameter) %>%  summarise(
 
 # condense info from each dataset into a single variable for clarity. 
 samples_summary$Soil_Samples <- 
-  ifelse(samples_summary$netMIN > 0, samples_summary$netMIN, 0)
+  ifelse(samples_summary$Net_Mineralization > 0, samples_summary$Net_Mineralization, 0)
 samples_summary$EEA_Samples <- 
-  ifelse(samples_summary$GLU_gOM > 0, samples_summary$GLU_gOM, 0)
+  ifelse(samples_summary$BG > 0, samples_summary$BG, 0)
 samples_summary$qPCR_Samples <- 
   ifelse(samples_summary$AOA >0, samples_summary$AOA, 0)
 
