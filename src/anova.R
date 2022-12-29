@@ -7,36 +7,36 @@ library(openxlsx)
 
 dat <- readRDS(file.path(getwd(), "/data/", "dat.RDS"))
 
-# prepare data ------------------------------------------------------------
-# filter conventional sites
-datfull <- dat
-dat <- datfull %>% filter(Site != "COV_31")
-datttest <- datfull %>% filter(
-  Treatment_Group %in% c("Conv.NC.T", "Conv.CC.T")
-)
-
 # means -------------------------------------------------------------------
-(conv.mean <- datfull %>% filter(Site == "COV_31") %>% 
+(conv.mean <- dat %>% filter(Site == "COV_31") %>% 
    tidyr::pivot_longer(
-     cols = names(datfull)[-c(1:9)], names_to = "Parameter"
+     cols = names(dat)[-c(1:9)], names_to = "Parameter"
    ) %>% 
    drop_na(value) %>% 
-   group_by(Parameter) %>% 
+   group_by(Year, Parameter) %>% 
    summarise(Conv.Mean = mean(value))
 )  
 
-(means <- datfull %>% 
+(means <- dat %>% 
   tidyr::pivot_longer(
-    cols = names(datfull)[-c(1:9)], names_to = "Parameter"
+    cols = names(dat)[-c(1:9)], names_to = "Parameter"
   ) %>% 
   drop_na(value) %>% 
   group_by(Treatment_Group, Parameter) %>% 
   summarise(Mean = mean(value), Median = median(value)) %>% 
   ungroup())
 
-means <- means %>% pivot_wider(
+(means <- means %>% pivot_wider(
   names_from = Parameter, 
   values_from = c(Mean, Median)
+))
+
+# prepare data ------------------------------------------------------------
+# filter conventional sites
+datfull <- dat
+dat <- datfull %>% filter(Site != "COV_31")
+datcctest <- datfull %>% filter(
+  Treatment_Group %in% c("Conv.NC.T", "Conv.CC.T")
 )
 
 # anova -------------------------------------------------------------------
@@ -46,96 +46,27 @@ means <- means %>% pivot_wider(
 ###
 str(dat)
 names(dat)
-# names(dat)[10:27]
 names(dat)[c(10:12,16:19,20:22, 26:27)]
 modlist <- list(
-  lm(log10(AOA) ~ Management_System / Tillage, data = dat),
-  lm(log10(AOB) ~ Management_System / Tillage, data = dat),
-  lm(log10(nosZ) ~ Management_System / Tillage, data = dat),
-  lm(Net_Mineralization ~ Management_System / Tillage, data = dat),
-  lm(Net_Nitrification ~ Management_System / Tillage, data = dat),
-  lm(Soil_NH4N ~ Management_System / Tillage, data = dat),
-  lm(Soil_NO3N ~ Management_System / Tillage, data = dat),
-  lm(log(BG) ~ Management_System / Tillage, data = dat),
-  lm(log(NAG) ~ Management_System / Tillage, data = dat),
-  lm(log(AP) ~ Management_System / Tillage, data = dat),
-  lm(`NAG:BG` ~ Management_System / Tillage, data = dat),
-  lm(`NAG:AP` ~ Management_System / Tillage, data = dat)
-  
-  # lm(OM_percent ~ Management_System / Tillage, data = dat),
-  # lm(Moisture_percent ~ Management_System / Tillage, data = dat),
-  # lm(BG_gSoil ~ Management_System / Tillage, data = dat),
-  # lm(NAG_gSoil ~ Management_System / Tillage, data = dat),
-  # lm(AP_gSoil ~ Management_System / Tillage, data = dat),
-  # lm(BG_gOM ~ Management_System / Tillage, data = dat),
-  # lm(NAG_gOM ~ Management_System / Tillage, data = dat),
-  # lm(AP_gOM ~ Management_System / Tillage, data = dat),
-  # lm(`ln(BG)_gSoil` ~ Management_System / Tillage, data = dat),
-  # lm(`ln(NAG)_gSoil` ~ Management_System / Tillage, data = dat),
-  # lm(`ln(AP)_gSoil` ~ Management_System / Tillage, data = dat),
-  # lm(`ln(BG):ln(NAG)_gSoil` ~ Management_System / Tillage, data = dat),
-  # lm(`ln(BG):ln(AP)_gSoil` ~ Management_System / Tillage, data = dat),
-  # lm(`ln(BG)_gOM` ~ Management_System / Tillage, data = dat),
-  # lm(`ln(NAG)_gOM` ~ Management_System / Tillage, data = dat),
-  # lm(`ln(AP)_gOM` ~ Management_System / Tillage, data = dat),
-  # lm(`ln(BG):ln(NAG)_gOM` ~ Management_System / Tillage, data = dat),
-  # lm(`ln(BG):ln(AP)_gOM` ~ Management_System / Tillage, data = dat)
+  lm(log10(AOA) ~ Year + Management_System / Tillage, data = dat),
+  lm(log10(AOB) ~ Year + Management_System / Tillage, data = dat),
+  lm(log10(nosZ) ~ Year + Management_System / Tillage, data = dat),
+  lm(Net_Mineralization ~ Year + Management_System / Tillage, data = dat),
+  lm(Net_Nitrification ~ Year + Management_System / Tillage, data = dat),
+  lm(Soil_NH4N ~ Year + Management_System / Tillage, data = dat),
+  lm(Soil_NO3N ~ Year + Management_System / Tillage, data = dat),
+  lm(log(BG) ~ Year + Management_System / Tillage, data = dat),
+  lm(log(NAG) ~ Year + Management_System / Tillage, data = dat),
+  lm(log(AP) ~ Year + Management_System / Tillage, data = dat),
+  lm(`NAG:BG` ~ Year + Management_System / Tillage, data = dat),
+  lm(`NAG:AP` ~ Year + Management_System / Tillage, data = dat)
 )
 names(modlist) <- names(dat)[c(10:12,16:19,20:22, 26:27)]
-
-# ###
-# # check anova assumptions
-# ###
-# ck.anova <- function(lmmod, vname) {
-#   
-#   # print/plot residuals; visually check for normality 
-#   png(
-#     file.path(getwd(), "figs", paste0("anova_residuals_", vname, ".png")), 
-#     width = 2*480, height = 2*480
-#   )
-#   par(mfrow=c(2,2))
-#   plot(lmmod)
-#   dev.off()
-#   par(mfrow=c(1,1))
-#   
-#   # # test for normality 
-#   # shapiro_output <- broom::tidy(
-#   #   shapiro.test(
-#   #     
-#   #   )
-#   # )
-#   # 
-#   # # test for equal variances 
-#   # car::levene.test()
-#   
-# }
-# 
-# shapiro.test(residuals(modlist[[1]]))
-# bartlett.test(modlist[[1]])
-# formula(modlist[[1]])
-# class(modlist[[1]])
-# ck.anova(modlist[[1]], names(modlist)[[1]])
-# 
-# # test for normality
-# shapiro.test(dat$AOA)
-# broom::tidy(shapiro.test(dat$AOA))
-# 
-# # equal variance
-# bartlett.test(log10(AOA) ~ Management_System / Tillage, data = dat)
-# car::leveneTest(log10(AOA) ~ Management_System / Tillage, data = dat)
-# broom::tidy(car::leveneTest(log10(AOA) ~ Management_System / Tillage, data = dat))
-# 
-# ckanova_ls <- vector(mode = "list", length = length(modlist))
-# ckanova_ls <- mapply(
-#   lmmod = modlist, 
-#   vname = names(modlist), 
-#   FUN = ck.anova
-# )
-# ckanova_ls
 
 ###
 # extract anova results 
 ###
+# car::Anova(modlist[[1]], type = 2)
 anovalist <- lapply(
   # X = modlist[1:2],
   X = modlist, 
@@ -144,14 +75,18 @@ anovalist <- lapply(
     # tmp[, c("Df", "F value", "Pr(>F)")]
     data.frame(
       # "Parameter" = names(modlist)[i],
-      "DFn.M" = tmp[1,2],
-      "DFd.M" = tmp[3,2],
-      "F.M" = tmp[1, 3],
-      "P.M" = tmp[1, 4],
-      "DFn.T" = tmp[2,2],
-      "DFd.T" = tmp[3,2],
-      "F.T" = tmp[2, 3],
-      "p.T" = tmp[2, 4]
+      "DFn.Y" = tmp[1,2], 
+      "DFd.Y" = tmp[4,2],
+      "F.Y" = tmp[1,3], 
+      "P.Y" = tmp[1,4],
+      "DFn.M" = tmp[2,2],
+      "DFd.M" = tmp[4,2], 
+      "F.M" = tmp[2, 3],
+      "P.M" = tmp[2, 4],
+      "DFn.T" = tmp[3,2],
+      "DFd.T" = tmp[4,2],
+      "F.T" = tmp[3, 3],
+      "p.T" = tmp[3, 4]
     )
   }
 )
@@ -166,33 +101,58 @@ car::Anova(modlist[[12]], type = 2)
 emmlist <- lapply(
   X = modlist, 
   FUN = function(i) {
-    temm <- emmeans(object = i, specs = ~ Management_System / Tillage, type = "response")
+    temm <- emmeans(object = i, specs = ~ Year + Management_System / Tillage, type = "response")
     temm <- as.data.frame(temm)
     return(temm)
   }
 )
 emmlist
 
-# rename "response" to "emmean" so we can bind qPCR data entries with others 
-# lapply(emmlist, colnames)
+###
+# combine EMM results
+###
 which(
     sapply(
       lapply(emmlist, colnames), FUN = function(i) {("response" %in% (i))}
     ) == TRUE
 )
 
-###
-# combine EMM results
-###
-# change colname from response to emmean
-colnames(emmlist[[1]])[3] <- colnames(emmlist[[2]])[3] <- colnames(emmlist[[3]])[3] <- colnames(emmlist[[8]])[3] <- colnames(emmlist[[9]])[3] <- colnames(emmlist[[10]])[3] <- "emmean"
-
-# colnames(emmlist[[1]])[3] <- "emmean"
-# colnames(emmlist[[2]])[3] <- "emmean"
-# colnames(emmlist[[3]])[3] <- "emmean"
+colnames(emmlist[[1]])[4] <- colnames(emmlist[[2]])[4] <- colnames(emmlist[[3]])[4] <- colnames(emmlist[[8]])[4] <- colnames(emmlist[[9]])[4] <- colnames(emmlist[[10]])[4] <- "emmean"
 
 emmdf <- do.call("rbind", emmlist)
-emmdf$Parameter <- rep(names(modlist), each = 4)
+emmdf$Parameter <- rep(names(modlist), each = 8)
+
+
+# comparisons: year -------------------------------------------------------
+contlistY <- lapply(
+  X = modlist, 
+  FUN = function(i) {
+    temm <- emmeans(object = i, specs = ~ Year, type = "response")
+    tcont <- contrast(temm, method = "pairwise")
+    tcont <- as.data.frame(tcont)
+    return(tcont)
+  }
+)
+contlistY
+
+### 
+# combine year contrast list
+###
+which(
+  sapply(
+    lapply(contlistY, colnames), FUN = function(i) {("null" %in% (i))}
+  ) == TRUE
+)
+contlistY[[1]] <- contlistY[[1]][,-5]
+contlistY[[2]] <- contlistY[[2]][,-5]
+contlistY[[3]] <- contlistY[[3]][,-5]
+contlistY[[8]] <- contlistY[[8]][,-5]
+contlistY[[9]] <- contlistY[[9]][,-5]
+contlistY[[10]] <- contlistY[[10]][,-5]
+
+colnames(contlistY[[1]])[2] <- colnames(contlistY[[2]])[2] <- colnames(contlistY[[3]])[2] <- colnames(contlistY[[8]])[2] <- colnames(contlistY[[9]])[2] <- colnames(contlistY[[10]])[2] <- "estimate"
+
+contdfY <- do.call("rbind", contlistY)
 
 # comparisons: management system ------------------------------------------
 contlistM <- lapply(
@@ -202,9 +162,6 @@ contlistM <- lapply(
     tcont <- contrast(temm, method = "pairwise")
     tcont <- as.data.frame(tcont)
     return(tcont)
-    # tcld <- multcomp::cld(tcont)
-    # return(as.data.frame(tcld))
-    # return(list("contrasts" = tcont, "cld" = tcld))
   }
 )
 contlistM
@@ -212,7 +169,6 @@ contlistM
 ###
 # combine management contrast list
 ### 
-# remove null (extra) column
 which(
   sapply(
     lapply(contlistM, colnames), FUN = function(i) {("null" %in% (i))}
@@ -224,51 +180,12 @@ contlistM[[3]] <- contlistM[[3]][,-5]
 contlistM[[8]] <- contlistM[[8]][,-5]
 contlistM[[9]] <- contlistM[[9]][,-5]
 contlistM[[10]] <- contlistM[[10]][,-5]
-# rename "ratio" to "estimate so we can bind the data entries
-colnames(contlistM[[1]])[2] <- colnames(contlistM[[2]])[2] <- colnames(contlistM[[3]])[2] <- colnames(contlistM[[8]])[2] <- colnames(contlistM[[9]])[2] <- colnames(contlistM[[10]])[2] <- "estimate"
 
-# # remove extra column in qPCR entries
-# contlistM[[3]]
-# contlistM[[4]]
-# names(contlistM[[1]])
-# contlistM[[1]] <- contlistM[[1]][,-5]
-# contlistM[[2]] <- contlistM[[2]][,-5]
-# contlistM[[3]] <- contlistM[[3]][,-5]
-# # rename "ratio" to "estimate" so we can bind qPCR data entries with others 
-# colnames(contlistM[[1]])[2] <- "estimate"
-# colnames(contlistM[[2]])[2] <- "estimate"
-# colnames(contlistM[[3]])[2] <- "estimate"
+colnames(contlistM[[1]])[2] <- colnames(contlistM[[2]])[2] <- colnames(contlistM[[3]])[2] <- colnames(contlistM[[8]])[2] <- colnames(contlistM[[9]])[2] <- colnames(contlistM[[10]])[2] <- "estimate"
 
 contdfM <- do.call("rbind", contlistM)
 
-# do.call(
-#   "rbind", 
-#   lapply(
-#     X = modlist, 
-#     FUN = function(i) {
-#       temm <- emmeans(object = i, specs = ~ Management_System)
-#       tcont <- pairs(temm)
-#       return(tcont)
-#       # tcont <- contrast(temm, method = "pairwise")
-#       # tcont <- as.data.frame(tcont)
-#       # return(tcont)
-#       # tcld <- multcomp::cld(tcont)
-#       # return(as.data.frame(tcld))
-#       # return(list("contrasts" = tcont, "cld" = tcld))
-#     }
-#   )      
-# )
-
 # comparisons: tillage (within management system) -------------------------
-# emmeans(modlist$OM_percent, specs = ~ Tillage)
-# emmeans(modlist$OM_percent, specs = ~ Tillage, type = "response")
-# emmeans(modlist$OM_percent, specs = ~ Tillage | Management_System)
-# emmeans(modlist$OM_percent, specs = ~ Tillage | Management_System, type = "response")
-# 
-# contrast(emmeans(modlist$OM_percent, specs = ~ Tillage))
-# contrast(emmeans(modlist$OM_percent, specs = ~ Tillage | Management_System))
-# contrast(emmeans(modlist$OM_percent, specs = ~ Tillage | Management_System),  method = "pairwise")
-
 contlistT <- lapply(
   X = modlist, 
   FUN = function(i) {
@@ -282,7 +199,6 @@ contlistT
 ###
 # combine tillage contrast list
 ### 
-# remove null (extra) column
 which(
   sapply(
     lapply(contlistT, colnames), FUN = function(i) {("null" %in% (i))}
@@ -294,114 +210,70 @@ contlistT[[3]] <- contlistT[[3]][,-6]
 contlistT[[8]] <- contlistT[[8]][,-6]
 contlistT[[9]] <- contlistT[[9]][,-6]
 contlistT[[10]] <- contlistT[[10]][,-6]
-# rename "ratio" to "estimate so we can bind the data entries
-colnames(contlistT[[1]])[3] <- colnames(contlistT[[2]])[3] <- colnames(contlistT[[3]])[3] <- colnames(contlistT[[8]])[3] <- colnames(contlistT[[9]])[3] <- colnames(contlistT[[10]])[3] <- "estimate"
 
-# # remove extra column in qPCR entries
-# contlistT[[3]]
-# contlistT[[4]]
-# names(contlistT[[1]])
-# contlistT[[1]] <- contlistT[[1]][,-6]
-# contlistT[[2]] <- contlistT[[2]][,-6]
-# contlistT[[3]] <- contlistT[[3]][,-6]
-# # rename "ratio" to "estimate" so we can bind qPCR data entries with others 
-# colnames(contlistT[[1]])[3] <- "estimate"
-# colnames(contlistT[[2]])[3] <- "estimate"
-# colnames(contlistT[[3]])[3] <- "estimate"
+colnames(contlistT[[1]])[3] <- colnames(contlistT[[2]])[3] <- colnames(contlistT[[3]])[3] <- colnames(contlistT[[8]])[3] <- colnames(contlistT[[9]])[3] <- colnames(contlistT[[10]])[3] <- "estimate"
 
 contdfT <- do.call("rbind", contlistT)
 contdfT$Parameter <- rep(names(modlist), each = 2)
 
 
-# conv NC to conv CC comparisons ------------------------------------------
-
-with(datttest, table(Treatment_Group, Cover_Crop))
-
-ttestls <- list(
-  t.test(log10(AOA) ~ Cover_Crop, paired = FALSE, data = datttest),
-  t.test(log10(AOB) ~ Cover_Crop, paired = FALSE, data = datttest),
-  t.test(log10(nosZ) ~ Cover_Crop, paired = FALSE, data = datttest),
-  t.test(Net_Mineralization ~ Cover_Crop, paired = FALSE, data = datttest),
-  t.test(Net_Nitrification ~ Cover_Crop, paired = FALSE, data = datttest),
-  t.test(Soil_NH4N ~ Cover_Crop, paired = FALSE, data = datttest),
-  t.test(Soil_NO3N ~ Cover_Crop, paired = FALSE, data = datttest),
-  
-  t.test(log(BG) ~ Cover_Crop, data = datttest),
-  t.test(log(NAG) ~ Cover_Crop, data = datttest),
-  t.test(log(AP) ~ Cover_Crop, data = datttest),
-  t.test(`NAG:BG` ~ Cover_Crop, data = datttest),
-  t.test(`NAG:AP` ~ Cover_Crop, data = datttest)
-  
-  # t.test(OM_percent ~ Cover_Crop, paired = FALSE, data = datttest),
-  # t.test(Moisture_percent ~ Cover_Crop, paired = FALSE, data = datttest),
-  # t.test(BG_gSoil ~ Cover_Crop, paired = FALSE, data = datttest),
-  # t.test(NAG_gSoil ~ Cover_Crop, paired = FALSE, data = datttest),
-  # t.test(AP_gSoil ~ Cover_Crop, paired = FALSE, data = datttest), 
-  # t.test(BG_gOM ~ Cover_Crop, paired = FALSE, data = datttest),
-  # t.test(NAG_gOM ~ Cover_Crop, paired = FALSE, data = datttest),
-  # t.test(AP_gOM ~ Cover_Crop, paired = FALSE, data = datttest), 
-  # t.test(`ln(BG)_gSoil` ~ Cover_Crop, paired = FALSE, data = datttest),
-  # t.test(`ln(NAG)_gSoil` ~ Cover_Crop, paired = FALSE, data = datttest), 
-  # t.test(`ln(AP)_gSoil` ~ Cover_Crop, paired = FALSE, data = datttest),
-  # t.test(`ln(BG):ln(NAG)_gSoil` ~ Cover_Crop, paired = FALSE, data = datttest),
-  # t.test(`ln(BG):ln(AP)_gSoil` ~ Cover_Crop, paired = FALSE, data = datttest),
-  # t.test(`ln(BG)_gOM` ~ Cover_Crop, paired = FALSE, data = datttest),
-  # t.test(`ln(NAG)_gOM` ~ Cover_Crop, paired = FALSE, data = datttest), 
-  # t.test(`ln(AP)_gOM` ~ Cover_Crop, paired = FALSE, data = datttest),
-  # t.test(`ln(BG):ln(NAG)_gOM` ~ Cover_Crop, paired = FALSE, data = datttest),
-  # t.test(`ln(BG):ln(AP)_gOM` ~ Cover_Crop, paired = FALSE, data = datttest) 
+# test for impact of cover crop  ------------------------------------------
+modlistcc <- list(
+  lm(log10(AOA) ~ Cover_Crop, data = datcctest),
+  lm(log10(AOB) ~ Cover_Crop, data = datcctest),
+  lm(log10(nosZ) ~ Cover_Crop, data = datcctest),
+  lm(Net_Mineralization ~ Cover_Crop, data = datcctest),
+  lm(Net_Nitrification ~ Cover_Crop, data = datcctest),
+  lm(Soil_NH4N ~ Cover_Crop, data = datcctest),
+  lm(Soil_NO3N ~ Cover_Crop, data = datcctest),
+  lm(log(BG) ~ Cover_Crop, data = datcctest),
+  lm(log(NAG) ~ Cover_Crop, data = datcctest),
+  lm(log(AP) ~ Cover_Crop, data = datcctest),
+  lm(`NAG:BG` ~ Cover_Crop, data = datcctest),
+  lm(`NAG:AP` ~ Cover_Crop, data = datcctest)
 )
+names(modlistcc) <- names(dat)[c(10:12,16:19,20:22, 26:27)]
 
-names(ttestls) <- names(dat)[c(10:12,16:19,20:22, 26:27)]
-ttestls
-broom::tidy(ttestls[["AP"]])
-ttestresls <- lapply(
-  X = ttestls, 
+
+contlistC <- lapply(
+  X = modlistcc, 
   FUN = function(i) {
-    broom::tidy(i)
+    temm <- emmeans(i, specs = ~ Cover_Crop, type = "response")
+    tcont <- contrast(temm, method = "pairwise")
+    tcont <- as.data.frame(tcont)
   }
 )
-ttestresls
+contlistC
 
-ttestdf <- do.call("rbind", ttestresls)
-ttestdf$Parameter <- names(ttestls)
-names(ttestdf)[which(names(ttestdf) == "parameter")] <- "df"
-names(ttestdf)[which(names(ttestdf) == "statistic")] <- "t"
+###
+# combine cover crop contrast list
+### 
+which(
+  sapply(
+    lapply(contlistC, colnames), FUN = function(i) {("null" %in% (i))}
+  ) == TRUE
+)
+contlistC[[1]] <- contlistC[[1]][,-5]
+contlistC[[2]] <- contlistC[[2]][,-5]
+contlistC[[3]] <- contlistC[[3]][,-5]
+contlistC[[8]] <- contlistC[[8]][,-5]
+contlistC[[9]] <- contlistC[[9]][,-5]
+contlistC[[10]] <- contlistC[[10]][,-5]
+
+colnames(contlistC[[1]])[2] <- colnames(contlistC[[2]])[2] <- colnames(contlistC[[3]])[2] <- colnames(contlistC[[8]])[2] <- colnames(contlistC[[9]])[2] <- colnames(contlistC[[10]])[2] <- "estimate"
+
+contdfC <- do.call("rbind", contlistC)
 
 # export output  ----------------------------------------------------------
-if (!"ANOVA_output.xlsx" %in% # check to see if excel file exists
-    list.files(path = file.path(getwd(), "output"))) {
-  
-  # create excel file (workbook object) to accept data, if not present in directory 
-  wb <- createWorkbook()
-  addWorksheet(wb, sheet ="conv_mean")
-  addWorksheet(wb, sheet ="means")
-  addWorksheet(wb, sheet ="anovadf")
-  addWorksheet(wb, sheet ="emmdf")
-  addWorksheet(wb, sheet ="contdfM")
-  addWorksheet(wb, sheet ="contdfT")
-  addWorksheet(wb, sheet ="ttestdf")
-  
-} else {
-  wb <- loadWorkbook(file.path(getwd(), "output", "ANOVA_output.xlsx" ))
-  
-  removeWorksheet(wb, sheet ="conv_mean")
-  removeWorksheet(wb, sheet ="means")
-  removeWorksheet(wb, sheet ="anovadf")
-  removeWorksheet(wb, sheet ="emmdf")
-  removeWorksheet(wb, sheet ="contdfM")
-  removeWorksheet(wb, sheet ="contdfT")
-  removeWorksheet(wb, sheet ="ttestdf")
-  
-  addWorksheet(wb, sheet ="conv_mean")
-  addWorksheet(wb, sheet ="means")
-  addWorksheet(wb, sheet ="anovadf")
-  addWorksheet(wb, sheet ="emmdf")
-  addWorksheet(wb, sheet ="contdfM")
-  addWorksheet(wb, sheet ="contdfT")
-  addWorksheet(wb, sheet ="ttestdf")
-}
+wb <- createWorkbook()
 
+addWorksheet(wb, sheet ="conv_mean")
+addWorksheet(wb, sheet ="means")
+addWorksheet(wb, sheet ="anovadf")
+addWorksheet(wb, sheet ="emmdf")
+addWorksheet(wb, sheet ="contdfM")
+addWorksheet(wb, sheet ="contdfT")
+addWorksheet(wb, sheet ="contdfC")
 
 wb$sheet_names
 
@@ -439,6 +311,14 @@ writeData(
 
 writeData(
   wb, 
+  x = contdfY,
+  sheet = "contdfY", 
+  startCol = 1, startRow = 1, 
+  rowNames = TRUE, colNames = TRUE
+)
+
+writeData(
+  wb, 
   x = contdfM,
   sheet = "contdfM", 
   startCol = 1, startRow = 1, 
@@ -453,13 +333,13 @@ writeData(
   rowNames = TRUE, colNames = TRUE
 )
 
-writeData(
-  wb, 
-  x = ttestdf,
-  sheet = "ttestdf", 
-  startCol = 1, startRow = 1, 
-  rowNames = TRUE, colNames = TRUE
-)
+# writeData(
+#   wb, 
+#   x = ttestdf,
+#   sheet = "ttestdf", 
+#   startCol = 1, startRow = 1, 
+#   rowNames = TRUE, colNames = TRUE
+# )
 
 # save to file
 saveWorkbook(
