@@ -127,7 +127,8 @@ datmain <- datmain %>% drop_na(value)
   facet_grid(Parameter ~ ., scales = "free_y") + 
   theme(
     legend.position = "bottom", 
-    axis.title.y = element_blank()
+    axis.title.y = element_blank(), 
+    panel.grid.major.x = element_blank()
   ) +
   scale_y_continuous(trans = "log10") 
 )
@@ -147,7 +148,8 @@ datmain <- datmain %>% drop_na(value)
     facet_grid(Parameter ~ ., scales = "free_y") + 
     theme(
       legend.position = "bottom", 
-      axis.title.y = element_blank()
+      axis.title.y = element_blank(), 
+      panel.grid.major.x = element_blank()
     ) 
 )
 
@@ -166,6 +168,7 @@ datmain <- datmain %>% drop_na(value)
     theme(
       legend.position = "bottom", 
       axis.title.y = element_blank(), 
+      panel.grid.major.x = element_blank(),
       axis.text.x = element_text(size = rel(0.85))
     )  
 )
@@ -204,7 +207,8 @@ ggplot(
   facet_wrap(Parameter~., scales = "free_y", ncol = 2, dir = "v") +
   theme(
     legend.position = "bottom", 
-    axis.title.y = element_blank()
+    axis.title.y = element_blank(), 
+    panel.grid.major.x = element_blank()
   ) 
 
 ggsave(
