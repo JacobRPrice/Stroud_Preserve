@@ -103,7 +103,6 @@ datls <- lapply(
 str(datls[[1]])
 str(datls[[2]])
 
-
 # convert to long format and join dataframes ------------------------------
 datls <- lapply(
   X = datls, 
@@ -123,20 +122,13 @@ datls <- lapply(
 )
 head(datls)
 
-
 # join individual dataframes
 dat <- plyr::ldply(datls, rbind, .id = NULL)
 str(dat)
 
-
 # handle date info --------------------------------------------------------
 # convert date to an actual date/time format
-head(dat$Date)
-# as.POSIXct(head(dat$Date), format = "%m/%d/%y %H:%M:%S")
-# lubridate::year(as.POSIXct(head(dat$Date), format = "%m/%d/%y %H:%M:%S"))
-# lubridate::month(as.POSIXct(head(dat$Date), format = "%m/%d/%y %H:%M:%S"))
-# lubridate::day(as.POSIXct(head(dat$Date), format = "%m/%d/%y %H:%M:%S"))
-
+head(dat$Date, 10)
 dat$Date <- as.POSIXct(dat$Date, tz = "Etc/GMT-5", format = "%m/%d/%y %H:%M:%S")
 
 # any dates incorrectly formatted? 
@@ -157,42 +149,49 @@ dat$Parameter <- gsub("[1-9]", "", dat$Parameter)
 sort(unique(dat$Parameter))
 
 
-# daily rain totals -------------------------------------------------------
+# rain summary stats ------------------------------------------------------
 raindat <- dat %>% filter(Parameter == "Rain") %>%  
   group_by(Year, Month, mDay, yDay) %>% 
   summarize(Daily_Precip = sum(value)) %>% ungroup()
 
+raindat
 max(raindat$Daily_Precip)
+dim(raindat)
+
+raindat <- raindat %>% group_by(Year) %>% 
+  mutate(
+    Cumulative_Precip = cumsum(Daily_Precip)
+  ) %>% ungroup()
+
+raindat <- pivot_longer(
+  raindat, 
+  cols = c("Daily_Precip", "Cumulative_Precip"), 
+  names_to = "Parameter",
+  values_to = "value"
+)
 
 # plot rain/precip --------------------------------------------------------
 ggplot(
   data = raindat, 
   aes(
     x = yDay, 
-    y = Daily_Precip, 
-    color = Year, 
-    shape = Year
+    y = value, 
+    color = Year
   )
 ) +
   theme_bw() +
-  geom_hline(yintercept = 0) +
-  geom_point(alpha = 0.25) +
-  # geom_smooth() +
-  geom_smooth(se = FALSE, method = "loess") +
-  coord_cartesian(
-    # ylim = c(0, max(raindat$Daily_Precip)),
-    # ylim = c(0, 10),
-    xlim = c(0, 366)
-  ) +
+  geom_smooth(se = FALSE, method = "loess", size = 0.5) +
+  facet_grid(Parameter ~ ., scales = "free_y") +
+  coord_cartesian(xlim = c(0, 366)) +
   theme(
+    axis.title.y = element_blank(),
     legend.position = "bottom"
   ) +
-  ylab("Daily Precipitation (mm)") +
   xlab("Day of the Year")
 
 ggsave(
   filename = file.path(getwd(), "figs", "weatherstation_rain_smooth.pdf"),
-  width = 3, height = 7, units = "in"
+  width = 8.5, height = 2*8.5+2, units = "cm"
 )
 
 # export precipitation summary --------------------------------------------
@@ -201,4 +200,171 @@ write.csv(
   file.path(getwd(), "output", "raindat.csv")
 )
 
-
+# # Dew Point ---------------------------------------------------------------
+# dpdat <- dat %>% filter(Parameter == "Dew_Point") %>%  
+#   group_by(Year, Month, mDay, yDay) %>% 
+#   summarize(
+#     Mean = mean(value),
+#     Min = min(value),
+#     Max = max(value)
+#   ) %>% ungroup() %>% 
+#   mutate(var_group = "Dew_Point")
+# 
+# # gust speed --------------------------------------------------------------
+# gsdat <- dat %>% filter(Parameter == "Gust_Speed") %>%  
+#   group_by(Year, Month, mDay, yDay) %>% 
+#   summarize(
+#     Mean = mean(value),
+#     Min = min(value),
+#     Max = max(value)
+#   ) %>% ungroup() %>% 
+#   mutate(var_group = "Gust_Speed")
+# 
+# # pressure ----------------------------------------------------------------
+# pdat <- dat %>% filter(Parameter == "Pressure") %>%  
+#   group_by(Year, Month, mDay, yDay) %>% 
+#   summarize(
+#     Mean = mean(value),
+#     Min = min(value),
+#     Max = max(value)
+#   ) %>% ungroup() %>% 
+#   mutate(var_group = "Pressure")
+# 
+# # rain --------------------------------------------------------------------
+# raindat <- dat %>% filter(Parameter == "Rain") %>%  
+#   group_by(Year, Month, mDay, yDay) %>% 
+#   summarize(Daily_Precip = sum(value)) %>% ungroup()
+# 
+# raindat
+# max(raindat$Daily_Precip)
+# dim(raindat)
+# 
+# raindat <- raindat %>% group_by(Year) %>% 
+#   mutate(
+#     Cumulative_Precip = cumsum(Daily_Precip), 
+#     var_group = "Precip"
+#   ) %>% ungroup()
+# 
+# # rel humidity ------------------------------------------------------------
+# rhdat <- dat %>% filter(Parameter == "Rel_Humidity") %>%  
+#   group_by(Year, Month, mDay, yDay) %>% 
+#   summarize(
+#     Mean = mean(value),
+#     Min = min(value),
+#     Max = max(value)
+#   ) %>% ungroup() %>% 
+#   mutate(var_group = "Rel_Humidity")
+# 
+# # Solar Radiation ---------------------------------------------------------
+# srdat <- dat %>% filter(Parameter == "Solar_Radiation") %>%  
+#   group_by(Year, Month, mDay, yDay) %>% 
+#   summarize(
+#     Mean = mean(value),
+#     Min = min(value),
+#     Max = max(value)
+#   ) %>% ungroup() %>% 
+#   mutate(var_group = "Solar_Radiation")
+# 
+# # Temp --------------------------------------------------------------------
+# tdat <- dat %>% filter(Parameter == "Temp") %>%  
+#   group_by(Year, Month, mDay, yDay) %>% 
+#   summarize(
+#     Mean = mean(value),
+#     Min = min(value),
+#     Max = max(value)
+#   ) %>% ungroup() %>% 
+#   mutate(var_group = "Temp")
+# 
+# # Wind Speed --------------------------------------------------------------
+# wsdat <- dat %>% filter(Parameter == "Wind_Speed") %>%  
+#   group_by(Year, Month, mDay, yDay) %>% 
+#   summarize(
+#     Mean = mean(value),
+#     Min = min(value),
+#     Max = max(value)
+#   ) %>% ungroup() %>% 
+#   mutate(var_group = "Wind_Speed")
+# 
+# 
+# # join individual datasets back together.  --------------------------------
+# # pivot_longer(
+# #   dpdat, 
+# #   cols = ends_with(c("_Mean", "_Min", "_Max")), 
+# #   names_to = "Parameter", 
+# #   values_to = "value"
+# # )
+# # pivot_longer(
+# #   raindat,
+# #   cols = ends_with(c("_Mean", "_Min", "_Max")),
+# #   names_to = "Parameter",
+# #   values_to = "value"
+# # )
+# # lapply(
+# #   X = list(dpdat, gsdat, pdat, rhdat, srdat, tdat, wsdat), 
+# #   names
+# # )
+# 
+# sumdat_ls <- vector(mode = "list", length = length(list(dpdat, gsdat, pdat, rhdat, srdat, tdat, wsdat)))
+# 
+# sumdat_ls <- lapply(
+#   X = list(dpdat, gsdat, pdat, rhdat, srdat, tdat, wsdat), 
+#   FUN = function(i) {
+#     # print(i)
+#     pivot_longer(
+#       i, 
+#       cols = ends_with(c("Mean", "Min", "Max")), 
+#       names_to = "Parameter", values_to = "value"
+#     )
+#   }
+# )
+# 
+# sumdat <- do.call("rbind", sumdat_ls)
+# 
+# # raindat
+# # raindat_long <- pivot_longer(
+# #   raindat, 
+# #   cols = c("Daily_Precip", "Cumulative_Precip"), 
+# #   names_to = "Parameter", values_to = "value"
+# # )
+# # sumdat <- rbind(sumdat, raindat_long)
+# 
+# # plot all ----------------------------------------------------------------
+# ggplot(
+#   data = sumdat, 
+#   aes(
+#     x = mDay, 
+#     y = value,
+#     # shape = Year,
+#     col = Year
+#   )
+# ) +
+#   theme_bw() +
+#   geom_point(alpha = 0.25) +
+#   # geom_smooth(se = FALSE) +
+#   # facet_grid(var_group ~ ., scales = "free_y")
+#   facet_grid(Parameter ~ ., scales = "free_y")
+#   
+# 
+# 
+# 
+# # # daily stats -------------------------------------------------------------
+# # dailydat <- dat %>% group_by(Year, Month, mDay, yDay, Parameter) %>% 
+# #   summarize(
+# #     Mean = mean(value),
+# #     Min = min(value),
+# #     Max = max(value)
+# #   ) %>% ungroup()
+# # 
+# # ggplot(
+# #   data = dailydat, 
+# #   aes(
+# #     x = Day, 
+# #     y = 
+# #   )
+# # )
+# 
+# 
+# 
+# 
+# 
+# 
