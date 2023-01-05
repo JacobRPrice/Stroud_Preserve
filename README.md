@@ -26,13 +26,20 @@ ANOVA --> Figures
 ANOVA --> Tables
 ```
 
-## Description of scripts within this repo:
+## Description of scripts within this repository:
 
-  - ./r/Prepare\_Data.R - this script imports the various raw data files
-    in ./data/ and prepares them for use with the remaining (analytical)
-    scripts in this repo.  
-  - ./r/Sampling\_Table.R - Creates a .csv file with the sample counts
-    by sampling date and analysis type.
+  - ./r/Prepare\_Data.R - imports the various raw data files in ./data/
+    and prepares them for use with the remaining (analytical) scripts in
+    this repo  
+  - ./r/Sampling\_Table.R - creates a .csv file with the sample counts
+    by sampling date and analysis type  
+  - ./r/seasonality.R - generates figures illustrating how parameter
+    values … erm… vary over the course of the year
+  - ./r/boxplots.R - generates boxplots
+  - ./r/eea.R - creates eea ratio plots
+  - ./r/anova.R - carries out hypothesis tests
+  - ./r/weather\_station.R - produces visualizations and summary
+    statistics from weather station data
 
 ## Reproducing the Results
 
