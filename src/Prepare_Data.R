@@ -67,7 +67,8 @@ treats
 treats$Treatment_Group <- with(
   treats, 
   interaction(
-    treats$Management_System, treats$Cover_Crop, treats$Tillage,
+    # treats$Management_System, treats$Cover_Crop, treats$Tillage,
+    treats$Management_System, treats$Tillage, treats$Cover_Crop, 
     drop = TRUE, 
     lex.order = TRUE
   )
