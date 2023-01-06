@@ -152,26 +152,28 @@ sort(unique(dat$Parameter))
 # rain summary stats ------------------------------------------------------
 raindat <- dat %>% filter(Parameter == "Rain") %>%  
   group_by(Year, Month, mDay, yDay) %>% 
-  summarize(Daily_Precip = sum(value)) %>% ungroup()
+  summarize(
+    `Daily Precip (mm)` = sum(value)
+  ) %>% ungroup()
 
 raindat
-max(raindat$Daily_Precip)
+max(raindat$`Daily Precip (mm)`)
 dim(raindat)
 
 raindat <- raindat %>% group_by(Year) %>% 
   mutate(
-    Cumulative_Precip = cumsum(Daily_Precip)
+    `Cumulative Precip (mm)` = cumsum(`Daily Precip (mm)`)
   ) %>% ungroup()
 
 raindat <- pivot_longer(
   raindat, 
-  cols = c("Daily_Precip", "Cumulative_Precip"), 
+  cols = c(`Daily Precip (mm)`, `Cumulative Precip (mm)`), 
   names_to = "Parameter",
   values_to = "value"
 )
 
 # plot rain/precip --------------------------------------------------------
-ggplot(
+(prain.combined <- ggplot(
   data = raindat, 
   aes(
     x = yDay, 
@@ -188,11 +190,78 @@ ggplot(
     legend.position = "bottom"
   ) +
   xlab("Day of the Year")
+)
 
 ggsave(
   filename = file.path(getwd(), "figs", "weatherstation_rain_smooth.pdf"),
+  prain.combined, 
   width = 8.5, height = 2*8.5+2, units = "cm"
 )
+
+
+# temperature -------------------------------------------------------------
+tempdat <- dat %>% filter(Parameter == "Temp") %>% 
+  group_by(Year, Month, mDay, yDay) %>% 
+  summarize(
+    Parameter = "Temperature (deg C)",
+    value = mean(value)
+  ) %>% ungroup()
+
+# (ptemp <- ggplot(
+#   data = tempdat, 
+#   aes(
+#     x = yDay, 
+#     y = value, 
+#     color = Year
+#   )
+# ) +
+#     theme_bw() +
+#     
+#     geom_smooth(se = FALSE, method = "loess", size = 0.5) +
+#     # facet_grid(Parameter ~ ., scales = "free_y") +
+#     coord_cartesian(xlim = c(0, 366)) +
+#     theme(
+#       # axis.title.y = element_blank(),
+#       legend.position = "bottom"
+#     ) +
+#     xlab("Day of the Year") +
+#     ylab("Temperature (deg C)")
+# )
+
+
+# merge rain and temperature datasets -------------------------------------
+raindat
+tempdat
+
+rain.temp <- rbind(raindat, tempdat)
+
+# plot both datasets ------------------------------------------------------
+(p.rain.temp <- ggplot(
+  data = rain.temp, 
+  aes(
+    x = yDay, 
+    y = value, 
+    color = Year
+  )
+) +
+  theme_bw() +
+  geom_smooth(se = FALSE, method = "loess", size = 0.5) +
+  facet_grid(Parameter ~ ., scales = "free_y") +
+  coord_cartesian(xlim = c(0, 366)) +
+  theme(
+    axis.title.y = element_blank(),
+    legend.position = "bottom"
+  ) +
+  xlab("Day of the Year")
+)
+
+ggsave(
+  filename = file.path(getwd(), "figs", "weatherstation.pdf"),
+  p.rain.temp, 
+  width = 8.5, height = 24, units = "cm"
+)
+
+
 
 # export precipitation summary --------------------------------------------
 write.csv(
