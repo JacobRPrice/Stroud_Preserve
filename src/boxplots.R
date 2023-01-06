@@ -41,18 +41,18 @@ datmain <- subset(
     c(
       "Net_Nitrification", "Soil_NH4N", "Net_Mineralization", "Soil_NO3N",
       
-      # "AOA", "AOB", "nosZ", 
-      "log(AOA)", "log(AOB)", "log(nosZ)", 
+      "AOA", "AOB", "nosZ",
+      # "log(AOA)", "log(AOB)", "log(nosZ)", 
       
-      # "BG", "NAG", "AP",
-      "ln(BG)", "ln(NAG)", "ln(AP)", 
+      "BG", "NAG", "AP",
+      # "ln(BG)", "ln(NAG)", "ln(AP)", 
       "NAG:BG", "NAG:AP"
     )
   )
 )
 
 # restructure data
-names(qpcr)
+# names(qpcr)
 # qpcr <- pivot_longer(
 #   data = qpcr, 
 #   cols = names(qpcr)[-c(1:9)], 
@@ -97,11 +97,11 @@ datmain$Parameter <- factor(
   levels = c(
     "Net_Nitrification", "Soil_NH4N", "Net_Mineralization", "Soil_NO3N",
     
-    # "AOA", "AOB", "nosZ", 
-    "log(AOA)", "log(AOB)", "log(nosZ)", 
+    "AOA", "AOB", "nosZ",
+    # "log(AOA)", "log(AOB)", "log(nosZ)", 
     
-    # "BG", "NAG", "AP",
-    "ln(BG)", "ln(NAG)", "ln(AP)", 
+    "BG", "NAG", "AP",
+    # "ln(BG)", "ln(NAG)", "ln(AP)", 
     "NAG:BG", "NAG:AP"
   )
 )

@@ -41,11 +41,11 @@ datmain <- subset(
     c(
       "Net_Nitrification", "Soil_NH4N", "Net_Mineralization", "Soil_NO3N",
       
-      # "AOA", "AOB", "nosZ", 
-      "log(AOA)", "log(AOB)", "log(nosZ)", 
+      "AOA", "AOB", "nosZ",
+      # "log(AOA)", "log(AOB)", "log(nosZ)", 
       
-      # "BG", "NAG", "AP",
-      "ln(BG)", "ln(NAG)", "ln(AP)", 
+      "BG", "NAG", "AP",
+      # "ln(BG)", "ln(NAG)", "ln(AP)", 
       "NAG:BG", "NAG:AP"
     )
   )
@@ -97,11 +97,11 @@ datmain$Parameter <- factor(
   levels = c(
     "Net_Nitrification", "Soil_NH4N", "Net_Mineralization", "Soil_NO3N",
     
-    # "AOA", "AOB", "nosZ", 
-    "log(AOA)", "log(AOB)", "log(nosZ)", 
+    "AOA", "AOB", "nosZ",
+    # "log(AOA)", "log(AOB)", "log(nosZ)", 
     
-    # "BG", "NAG", "AP",
-    "ln(BG)", "ln(NAG)", "ln(AP)", 
+    "BG", "NAG", "AP",
+    # "ln(BG)", "ln(NAG)", "ln(AP)", 
     "NAG:BG", "NAG:AP"
   )
 )
@@ -241,7 +241,7 @@ datmain <- datmain %>% drop_na(value)
 # )
 ggsave(
   plot = apall,
-  filename = file.path(getwd(), "figs", "2020_vs_2021_MAIN_supp.pdf"), 
+  filename = file.path(getwd(), "figs", "2020_vs_2021_supp.pdf"), 
   width = 18, height = 24, units = "cm"
 )
 
