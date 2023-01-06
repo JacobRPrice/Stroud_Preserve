@@ -8,21 +8,21 @@ library(openxlsx)
 dat <- readRDS(file.path(getwd(), "/data/", "dat.RDS"))
 
 # means -------------------------------------------------------------------
-(conv.mean <- dat %>% filter(Site == "COV_31") %>% 
-   tidyr::pivot_longer(
-     cols = names(dat)[-c(1:9)], names_to = "Parameter"
-   ) %>% 
-   drop_na(value) %>% 
-   group_by(Year, Parameter) %>% 
-   summarise(Conv.Mean = mean(value))
-)  
+# (conv.mean <- dat %>% filter(Site == "COV_31") %>% 
+#    tidyr::pivot_longer(
+#      cols = names(dat)[-c(1:9)], names_to = "Parameter"
+#    ) %>% 
+#    drop_na(value) %>% 
+#    group_by(Year, Parameter) %>% 
+#    summarise(Conv.Mean = mean(value))
+# )  
 
 (means <- dat %>% 
   tidyr::pivot_longer(
     cols = names(dat)[-c(1:9)], names_to = "Parameter"
   ) %>% 
   drop_na(value) %>% 
-  group_by(Treatment_Group, Parameter) %>% 
+  group_by(Treatment_Group, Parameter, Year) %>% 
   summarise(Mean = mean(value), Median = median(value)) %>% 
   ungroup())
 
@@ -36,11 +36,10 @@ dat <- readRDS(file.path(getwd(), "/data/", "dat.RDS"))
 datfull <- dat
 dat <- datfull %>% filter(Site != "COV_31")
 datcctest <- datfull %>% filter(
-  Treatment_Group %in% c("Conv.NC.T", "Conv.CC.T")
+  Treatment_Group %in% c("Conv.T.NC", "Conv.T.CC")
 )
 
 # anova -------------------------------------------------------------------
-
 ###
 # specify models 
 ###
@@ -95,6 +94,29 @@ anovalist <- lapply(
 
 # double check that the order of entries are correct. 
 car::Anova(modlist[[12]], type = 2)
+
+###
+# p-value correction
+###
+# anovadf
+# c(anovadf$P.Y, anovadf$P.M, anovadf$p.T)
+# p.adjust.methods
+# ?p.adjust
+adjdf <- data.frame(
+  "pvals" = c(anovadf$P.Y, anovadf$P.M, anovadf$p.T),
+  "pvals.adj" = p.adjust(
+    c(anovadf$P.Y, anovadf$P.M, anovadf$p.T),
+    method = "fdr"
+  ), 
+  "outcome" = rownames(anovadf), 
+  "modterm" = c(rep("Year", 12), rep("M_S", 12), rep("T", 12))
+)
+adjdf$sig.change <- (adjdf$pvals<0.10) != (adjdf$pvals.adj<0.10)
+adjdf$sig <- adjdf$pvals.adj<0.10
+
+anovadf$P.Y.fdr <- adjdf$pvals.adj[1:12]
+anovadf$P.M.fdr <- adjdf$pvals.adj[13:24]
+anovadf$P.T.fdr <- adjdf$pvals.adj[25:36]
 
 
 # estimated marginal means ------------------------------------------------
@@ -154,6 +176,12 @@ colnames(contlistY[[1]])[2] <- colnames(contlistY[[2]])[2] <- colnames(contlistY
 
 contdfY <- do.call("rbind", contlistY)
 
+###
+# p-value correction
+###
+contdfY$p.value.adj <- p.adjust(contdfY$p.value, method = "fdr")
+
+
 # comparisons: management system ------------------------------------------
 contlistM <- lapply(
   X = modlist, 
@@ -185,37 +213,27 @@ colnames(contlistM[[1]])[2] <- colnames(contlistM[[2]])[2] <- colnames(contlistM
 
 contdfM <- do.call("rbind", contlistM)
 
-# comparisons: tillage (within management system) -------------------------
-contlistT <- lapply(
-  X = modlist, 
-  FUN = function(i) {
-    temm <- emmeans(object = i, specs = ~ Tillage | Management_System, type = "response")
-    tcont <- contrast(temm, method = "pairwise")
-    tcont <- as.data.frame(tcont)
-  }
-)
-contlistT
-
 ###
-# combine tillage contrast list
-### 
-which(
-  sapply(
-    lapply(contlistT, colnames), FUN = function(i) {("null" %in% (i))}
-  ) == TRUE
-)
-contlistT[[1]] <- contlistT[[1]][,-6]
-contlistT[[2]] <- contlistT[[2]][,-6]
-contlistT[[3]] <- contlistT[[3]][,-6]
-contlistT[[8]] <- contlistT[[8]][,-6]
-contlistT[[9]] <- contlistT[[9]][,-6]
-contlistT[[10]] <- contlistT[[10]][,-6]
-
-colnames(contlistT[[1]])[3] <- colnames(contlistT[[2]])[3] <- colnames(contlistT[[3]])[3] <- colnames(contlistT[[8]])[3] <- colnames(contlistT[[9]])[3] <- colnames(contlistT[[10]])[3] <- "estimate"
-
-contdfT <- do.call("rbind", contlistT)
-contdfT$Parameter <- rep(names(modlist), each = 2)
-
+# p-value correction
+###
+contdfM$p.value.adj <- p.adjust(contdfM$p.value, method = "fdr")
+# # why are some of the pvalues the same? 
+# p.adjust
+# tmpdat <- data.frame(
+#   "p.value" = contdfM$p.value, 
+#   "p.value.adj" = contdfM$p.value.adj, 
+#   "i" = length(contdfM$p.value):1L,
+#   "o" = order(contdfM$p.value, decreasing = TRUE), 
+#   "ro" = order(order(contdfM$p.value, decreasing = TRUE)),
+#   "p.value.adj.new" = 
+#     pmin(
+#       1,
+#       cummin(
+#         length(contdfM$p.value)/length(contdfM$p.value):1L *
+#           contdfM$p.value[order(contdfM$p.value, decreasing = TRUE)]
+#       )
+#     )[order(order(contdfM$p.value, decreasing = TRUE))]
+# )
 
 # test for impact of cover crop  ------------------------------------------
 modlistcc <- list(
@@ -233,7 +251,6 @@ modlistcc <- list(
   lm(`NAG:AP` ~ Cover_Crop, data = datcctest)
 )
 names(modlistcc) <- names(dat)[c(10:12,16:19,20:22, 26:27)]
-
 
 contlistC <- lapply(
   X = modlistcc, 
@@ -264,27 +281,33 @@ colnames(contlistC[[1]])[2] <- colnames(contlistC[[2]])[2] <- colnames(contlistC
 
 contdfC <- do.call("rbind", contlistC)
 
+###
+# p-value correction
+###
+contdfC$p.value.adj <- p.adjust(contdfC$p.value, method = "fdr")
+
+
 # export output  ----------------------------------------------------------
 wb <- createWorkbook()
 
-addWorksheet(wb, sheet ="conv_mean")
+# addWorksheet(wb, sheet ="conv_mean")
 addWorksheet(wb, sheet ="means")
 addWorksheet(wb, sheet ="anovadf")
 addWorksheet(wb, sheet ="emmdf")
 addWorksheet(wb, sheet ="contdfY")
 addWorksheet(wb, sheet ="contdfM")
-addWorksheet(wb, sheet ="contdfT")
+# addWorksheet(wb, sheet ="contdfT")
 addWorksheet(wb, sheet ="contdfC")
 
 wb$sheet_names
 
-writeData(
-  wb, 
-  x = conv.mean,
-  sheet = "conv_mean", 
-  startCol = 1, startRow = 1, 
-  rowNames = TRUE, colNames = TRUE
-)
+# writeData(
+#   wb, 
+#   x = conv.mean,
+#   sheet = "conv_mean", 
+#   startCol = 1, startRow = 1, 
+#   rowNames = TRUE, colNames = TRUE
+# )
 
 writeData(
   wb, 
@@ -326,13 +349,13 @@ writeData(
   rowNames = TRUE, colNames = TRUE
 )
 
-writeData(
-  wb, 
-  x = contdfT,
-  sheet = "contdfT", 
-  startCol = 1, startRow = 1, 
-  rowNames = TRUE, colNames = TRUE
-)
+# writeData(
+#   wb, 
+#   x = contdfT,
+#   sheet = "contdfT", 
+#   startCol = 1, startRow = 1, 
+#   rowNames = TRUE, colNames = TRUE
+# )
 
 writeData(
   wb, 
