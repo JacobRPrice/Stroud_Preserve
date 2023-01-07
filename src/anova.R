@@ -132,140 +132,12 @@ emmdf <- do.call("rbind", emmlist)
 emmdf$Parameter <- rep(names(modlist), each = 8)
 
 
-# comparisons: year -------------------------------------------------------
-contlistY <- lapply(
-  X = modlist, 
-  FUN = function(i) {
-    temm <- emmeans(object = i, specs = ~ Year, type = "response")
-    tcont <- contrast(temm, method = "pairwise")
-    tcont <- as.data.frame(tcont)
-    return(tcont)
-  }
-)
-contlistY
-
-### 
-# combine year contrast list
-###
-which(
-  sapply(
-    lapply(contlistY, colnames), FUN = function(i) {("null" %in% (i))}
-  ) == TRUE
-)
-contlistY[[1]] <- contlistY[[1]][,-5]
-contlistY[[2]] <- contlistY[[2]][,-5]
-contlistY[[3]] <- contlistY[[3]][,-5]
-contlistY[[8]] <- contlistY[[8]][,-5]
-contlistY[[9]] <- contlistY[[9]][,-5]
-contlistY[[10]] <- contlistY[[10]][,-5]
-
-colnames(contlistY[[1]])[2] <- colnames(contlistY[[2]])[2] <- colnames(contlistY[[3]])[2] <- colnames(contlistY[[8]])[2] <- colnames(contlistY[[9]])[2] <- colnames(contlistY[[10]])[2] <- "estimate"
-
-contdfY <- do.call("rbind", contlistY)
-
-###
-# p-value correction
-###
-contdfY$p.value.adj <- p.adjust(contdfY$p.value, method = "fdr")
-
-
-# comparisons: management system ------------------------------------------
-contlistM <- lapply(
-  X = modlist, 
-  FUN = function(i) {
-    temm <- emmeans(object = i, specs = ~ Management_System, type = "response")
-    tcont <- contrast(temm, method = "pairwise")
-    tcont <- as.data.frame(tcont)
-    return(tcont)
-  }
-)
-contlistM
-
-###
-# combine management contrast list
-### 
-which(
-  sapply(
-    lapply(contlistM, colnames), FUN = function(i) {("null" %in% (i))}
-  ) == TRUE
-)
-contlistM[[1]] <- contlistM[[1]][,-5]
-contlistM[[2]] <- contlistM[[2]][,-5]
-contlistM[[3]] <- contlistM[[3]][,-5]
-contlistM[[8]] <- contlistM[[8]][,-5]
-contlistM[[9]] <- contlistM[[9]][,-5]
-contlistM[[10]] <- contlistM[[10]][,-5]
-
-colnames(contlistM[[1]])[2] <- colnames(contlistM[[2]])[2] <- colnames(contlistM[[3]])[2] <- colnames(contlistM[[8]])[2] <- colnames(contlistM[[9]])[2] <- colnames(contlistM[[10]])[2] <- "estimate"
-
-contdfM <- do.call("rbind", contlistM)
-
-###
-# p-value correction
-###
-contdfM$p.value.adj <- p.adjust(contdfM$p.value, method = "fdr")
-
-# test for impact of cover crop  ------------------------------------------
-modlistcc <- list(
-  lm(log10(AOA) ~ Cover_Crop, data = datcctest),
-  lm(log10(AOB) ~ Cover_Crop, data = datcctest),
-  lm(log10(nosZ) ~ Cover_Crop, data = datcctest),
-  lm(Net_Mineralization ~ Cover_Crop, data = datcctest),
-  lm(Net_Nitrification ~ Cover_Crop, data = datcctest),
-  lm(Soil_NH4N ~ Cover_Crop, data = datcctest),
-  lm(Soil_NO3N ~ Cover_Crop, data = datcctest),
-  lm(log(BG) ~ Cover_Crop, data = datcctest),
-  lm(log(NAG) ~ Cover_Crop, data = datcctest),
-  lm(log(AP) ~ Cover_Crop, data = datcctest),
-  lm(`NAG:BG` ~ Cover_Crop, data = datcctest),
-  lm(`NAG:AP` ~ Cover_Crop, data = datcctest)
-)
-names(modlistcc) <- names(dat)[c(10:12,16:19,20:22, 26:27)]
-
-contlistC <- lapply(
-  X = modlistcc, 
-  FUN = function(i) {
-    temm <- emmeans(i, specs = ~ Cover_Crop, type = "response")
-    tcont <- contrast(temm, method = "pairwise")
-    tcont <- as.data.frame(tcont)
-  }
-)
-contlistC
-
-###
-# combine cover crop contrast list
-### 
-which(
-  sapply(
-    lapply(contlistC, colnames), FUN = function(i) {("null" %in% (i))}
-  ) == TRUE
-)
-contlistC[[1]] <- contlistC[[1]][,-5]
-contlistC[[2]] <- contlistC[[2]][,-5]
-contlistC[[3]] <- contlistC[[3]][,-5]
-contlistC[[8]] <- contlistC[[8]][,-5]
-contlistC[[9]] <- contlistC[[9]][,-5]
-contlistC[[10]] <- contlistC[[10]][,-5]
-
-colnames(contlistC[[1]])[2] <- colnames(contlistC[[2]])[2] <- colnames(contlistC[[3]])[2] <- colnames(contlistC[[8]])[2] <- colnames(contlistC[[9]])[2] <- colnames(contlistC[[10]])[2] <- "estimate"
-
-contdfC <- do.call("rbind", contlistC)
-
-###
-# p-value correction
-###
-contdfC$p.value.adj <- p.adjust(contdfC$p.value, method = "fdr")
-
-
 # export output  ----------------------------------------------------------
 wb <- createWorkbook()
 
 addWorksheet(wb, sheet ="means")
 addWorksheet(wb, sheet ="anovadf")
 addWorksheet(wb, sheet ="emmdf")
-addWorksheet(wb, sheet ="contdfY")
-addWorksheet(wb, sheet ="contdfM")
-addWorksheet(wb, sheet ="contdfC")
 
 wb$sheet_names
 
@@ -289,30 +161,6 @@ writeData(
   wb, 
   x = emmdf,
   sheet = "emmdf", 
-  startCol = 1, startRow = 1, 
-  rowNames = TRUE, colNames = TRUE
-)
-
-writeData(
-  wb, 
-  x = contdfY,
-  sheet = "contdfY", 
-  startCol = 1, startRow = 1, 
-  rowNames = TRUE, colNames = TRUE
-)
-
-writeData(
-  wb, 
-  x = contdfM,
-  sheet = "contdfM", 
-  startCol = 1, startRow = 1, 
-  rowNames = TRUE, colNames = TRUE
-)
-
-writeData(
-  wb, 
-  x = contdfC,
-  sheet = "contdfC", 
   startCol = 1, startRow = 1, 
   rowNames = TRUE, colNames = TRUE
 )
