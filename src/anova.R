@@ -131,6 +131,63 @@ colnames(emmlist[[1]])[4] <- colnames(emmlist[[2]])[4] <- colnames(emmlist[[3]])
 emmdf <- do.call("rbind", emmlist)
 emmdf$Parameter <- rep(names(modlist), each = 8)
 
+# anova: CC ---------------------------------------------------------------
+###
+# specify models 
+###
+modlistcc <- list(
+  lm(log10(AOA) ~ Year + Cover_Crop, data = datcctest),
+  lm(log10(AOB) ~ Year + Cover_Crop, data = datcctest),
+  lm(log10(nosZ) ~ Year + Cover_Crop, data = datcctest),
+  lm(Net_Mineralization ~ Year + Cover_Crop, data = datcctest),
+  lm(Net_Nitrification ~ Year + Cover_Crop, data = datcctest),
+  lm(Soil_NH4N ~ Year + Cover_Crop, data = datcctest),
+  lm(Soil_NO3N ~ Year + Cover_Crop, data = datcctest),
+  lm(log(BG) ~ Year + Cover_Crop, data = datcctest),
+  lm(log(NAG) ~ Year + Cover_Crop, data = datcctest),
+  lm(log(AP) ~ Year + Cover_Crop, data = datcctest),
+  lm(`NAG:BG` ~ Year + Cover_Crop, data = datcctest),
+  lm(`NAG:AP` ~ Year + Cover_Crop, data = datcctest)
+)
+names(modlistcc) <- names(dat)[c(10:12,16:19,20:22, 26:27)]
+
+anovalistcc <- lapply(
+  X = modlistcc, 
+  FUN = function(i) {
+    tmp <- as.data.frame(car::Anova(i, type = 2))
+    data.frame(
+      "DFn.Y" = tmp[1,2],
+      "DFd.Y" = tmp[3,2],
+      "F.Y" = tmp[1,3],
+      "P.Y" = tmp[1,4],
+      "DFn.C" = tmp[2,2],
+      "DFd.C" = tmp[3,2],
+      "F.C" = tmp[2, 3],
+      "P.C" = tmp[2, 4]
+    )
+  }
+)
+
+(anovadfcc <- do.call("rbind", anovalistcc))
+
+###
+# p-value correction
+###
+adjdfcc <- data.frame(
+  "pvals" = c(anovadfcc$P.Y, anovadfcc$P.C),
+  "pvals.adj" = p.adjust(
+    c(anovadfcc$P.Y, anovadfcc$P.C),
+    method = "fdr"
+  ), 
+  "outcome" = rownames(anovadfcc), 
+  "modterm" = c(rep("Year", 12), rep("CC", 12))
+)
+adjdfcc$sig.change <- (adjdfcc$pvals<0.10) != (adjdfcc$pvals.adj<0.10)
+adjdfcc$sig <- adjdfcc$pvals.adj<0.10
+
+anovadfcc$P.Y.fdr <- adjdfcc$pvals.adj[1:12]
+anovadfcc$P.C.fdr <- adjdfcc$pvals.adj[13:24]
+
 
 # export output  ----------------------------------------------------------
 wb <- createWorkbook()
@@ -138,6 +195,7 @@ wb <- createWorkbook()
 addWorksheet(wb, sheet ="means")
 addWorksheet(wb, sheet ="anovadf")
 addWorksheet(wb, sheet ="emmdf")
+addWorksheet(wb, sheet = "anovadf_cc")
 
 wb$sheet_names
 
@@ -161,6 +219,14 @@ writeData(
   wb, 
   x = emmdf,
   sheet = "emmdf", 
+  startCol = 1, startRow = 1, 
+  rowNames = TRUE, colNames = TRUE
+)
+
+writeData(
+  wb, 
+  x = anovadfcc,
+  sheet = "anovadf_cc", 
   startCol = 1, startRow = 1, 
   rowNames = TRUE, colNames = TRUE
 )
