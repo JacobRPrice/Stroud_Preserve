@@ -8,15 +8,6 @@ library(openxlsx)
 dat <- readRDS(file.path(getwd(), "/data/", "dat.RDS"))
 
 # means -------------------------------------------------------------------
-# (conv.mean <- dat %>% filter(Site == "COV_31") %>% 
-#    tidyr::pivot_longer(
-#      cols = names(dat)[-c(1:9)], names_to = "Parameter"
-#    ) %>% 
-#    drop_na(value) %>% 
-#    group_by(Year, Parameter) %>% 
-#    summarise(Conv.Mean = mean(value))
-# )  
-
 (means <- dat %>% 
   tidyr::pivot_longer(
     cols = names(dat)[-c(1:9)], names_to = "Parameter"
@@ -85,7 +76,7 @@ anovalist <- lapply(
       "DFn.T" = tmp[3,2],
       "DFd.T" = tmp[4,2],
       "F.T" = tmp[3, 3],
-      "p.T" = tmp[3, 4]
+      "P.T" = tmp[3, 4]
     )
   }
 )
@@ -98,14 +89,10 @@ car::Anova(modlist[[12]], type = 2)
 ###
 # p-value correction
 ###
-# anovadf
-# c(anovadf$P.Y, anovadf$P.M, anovadf$p.T)
-# p.adjust.methods
-# ?p.adjust
 adjdf <- data.frame(
-  "pvals" = c(anovadf$P.Y, anovadf$P.M, anovadf$p.T),
+  "pvals" = c(anovadf$P.Y, anovadf$P.M, anovadf$P.T),
   "pvals.adj" = p.adjust(
-    c(anovadf$P.Y, anovadf$P.M, anovadf$p.T),
+    c(anovadf$P.Y, anovadf$P.M, anovadf$P.T),
     method = "fdr"
   ), 
   "outcome" = rownames(anovadf), 
@@ -217,23 +204,6 @@ contdfM <- do.call("rbind", contlistM)
 # p-value correction
 ###
 contdfM$p.value.adj <- p.adjust(contdfM$p.value, method = "fdr")
-# # why are some of the pvalues the same? 
-# p.adjust
-# tmpdat <- data.frame(
-#   "p.value" = contdfM$p.value, 
-#   "p.value.adj" = contdfM$p.value.adj, 
-#   "i" = length(contdfM$p.value):1L,
-#   "o" = order(contdfM$p.value, decreasing = TRUE), 
-#   "ro" = order(order(contdfM$p.value, decreasing = TRUE)),
-#   "p.value.adj.new" = 
-#     pmin(
-#       1,
-#       cummin(
-#         length(contdfM$p.value)/length(contdfM$p.value):1L *
-#           contdfM$p.value[order(contdfM$p.value, decreasing = TRUE)]
-#       )
-#     )[order(order(contdfM$p.value, decreasing = TRUE))]
-# )
 
 # test for impact of cover crop  ------------------------------------------
 modlistcc <- list(
@@ -290,24 +260,14 @@ contdfC$p.value.adj <- p.adjust(contdfC$p.value, method = "fdr")
 # export output  ----------------------------------------------------------
 wb <- createWorkbook()
 
-# addWorksheet(wb, sheet ="conv_mean")
 addWorksheet(wb, sheet ="means")
 addWorksheet(wb, sheet ="anovadf")
 addWorksheet(wb, sheet ="emmdf")
 addWorksheet(wb, sheet ="contdfY")
 addWorksheet(wb, sheet ="contdfM")
-# addWorksheet(wb, sheet ="contdfT")
 addWorksheet(wb, sheet ="contdfC")
 
 wb$sheet_names
-
-# writeData(
-#   wb, 
-#   x = conv.mean,
-#   sheet = "conv_mean", 
-#   startCol = 1, startRow = 1, 
-#   rowNames = TRUE, colNames = TRUE
-# )
 
 writeData(
   wb, 
@@ -348,14 +308,6 @@ writeData(
   startCol = 1, startRow = 1, 
   rowNames = TRUE, colNames = TRUE
 )
-
-# writeData(
-#   wb, 
-#   x = contdfT,
-#   sheet = "contdfT", 
-#   startCol = 1, startRow = 1, 
-#   rowNames = TRUE, colNames = TRUE
-# )
 
 writeData(
   wb, 
