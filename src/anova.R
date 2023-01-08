@@ -189,6 +189,31 @@ anovadfcc$P.Y.fdr <- adjdfcc$pvals.adj[1:12]
 anovadfcc$P.C.fdr <- adjdfcc$pvals.adj[13:24]
 
 
+# estimated marginal means: cc --------------------------------------------
+emmlistcc <- lapply(
+  X = modlistcc, 
+  FUN = function(i) {
+    temm <- emmeans(object = i, specs = ~ Year + Cover_Crop, type = "response")
+    temm <- as.data.frame(temm)
+    return(temm)
+  }
+)
+emmlistcc
+
+###
+# combine EMM results
+###
+which(
+  sapply(
+    lapply(emmlistcc, colnames), FUN = function(i) {("response" %in% (i))}
+  ) == TRUE
+)
+
+colnames(emmlistcc[[1]])[3] <- colnames(emmlistcc[[2]])[3] <- colnames(emmlistcc[[3]])[3] <- colnames(emmlistcc[[8]])[3] <- colnames(emmlistcc[[9]])[3] <- colnames(emmlistcc[[10]])[3] <- "emmean"
+
+emmdfcc <- do.call("rbind", emmlistcc)
+emmdfcc$Parameter <- rep(names(modlistcc), each = 4)
+
 # export output  ----------------------------------------------------------
 wb <- createWorkbook()
 
@@ -196,6 +221,7 @@ addWorksheet(wb, sheet ="means")
 addWorksheet(wb, sheet ="anovadf")
 addWorksheet(wb, sheet ="emmdf")
 addWorksheet(wb, sheet = "anovadf_cc")
+addWorksheet(wb, sheet ="emmdf_cc")
 
 wb$sheet_names
 
@@ -227,6 +253,14 @@ writeData(
   wb, 
   x = anovadfcc,
   sheet = "anovadf_cc", 
+  startCol = 1, startRow = 1, 
+  rowNames = TRUE, colNames = TRUE
+)
+
+writeData(
+  wb, 
+  x = emmdfcc,
+  sheet = "emmdf_cc", 
   startCol = 1, startRow = 1, 
   rowNames = TRUE, colNames = TRUE
 )
