@@ -272,6 +272,9 @@ tempdat %>% group_by(Year) %>%
   )
 ) +
     theme_bw() +
+    # geom_vline(xintercept = 180) +
+    # geom_vline(xintercept = 225) +
+    # geom_vline(xintercept = 265) +
     # geom_point(alpha = 0.5) +
     # geom_path() +
     geom_smooth(se = FALSE, method = "loess", size = 0.5, show.legend = FALSE) +
