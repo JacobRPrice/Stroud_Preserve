@@ -205,6 +205,9 @@ datmain <- datmain %>% drop_na(value)
   )
 ) +
   theme_bw() +
+  # geom_vline(xintercept = 180, color = "red") +
+  # geom_vline(xintercept = 225, color = "red") +
+  # geom_vline(xintercept = 265, color = "blue") +
   geom_point() +
   geom_smooth(se = FALSE, size = 0.5) +
   facet_wrap(Parameter~., scales = "free_y", ncol = 2, dir = "v") +
@@ -257,6 +260,9 @@ ggplot(
   )
 ) +
   theme_bw() +
+  # geom_vline(xintercept = 180, color = "red") +
+  # geom_vline(xintercept = 225, color = "red") +
+  # geom_vline(xintercept = 265, color = "blue") +
   geom_point() +
   geom_smooth(se = FALSE, size = 0.5) +
   facet_wrap(Parameter~., scales = "free_y", ncol = 2, dir = "v") +
