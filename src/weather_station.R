@@ -2,6 +2,7 @@
 library(ggplot2)
 library(dplyr)
 library(tidyr)
+library(patchwork)
 
 # import data -------------------------------------------------------------
 weather_files <- c("Weather_Station_2020.csv", "Weather_Station_2021.csv")
@@ -177,34 +178,34 @@ raindat %>% filter(Parameter == quote(`Cumulative Precip (mm)`)) %>%
   summarise(annual_total_rainfall = max(value)) %>% 
   ungroup() %>% as.data.frame()
 
-# plot rain/precip --------------------------------------------------------
-(prain.combined <- ggplot(
-  data = raindat, 
-  aes(
-    x = yDay, 
-    y = value, 
-    color = Year
-  )
-) +
-  theme_bw() +
-  geom_hline(yintercept = 1167.0) +
-  geom_point() +
-  geom_path() +
-  # geom_smooth(se = FALSE, method = "loess", size = 0.5) +
-  facet_grid(Parameter ~ ., scales = "free_y") +
-  coord_cartesian(xlim = c(0, 366)) +
-  theme(
-    axis.title.y = element_blank(),
-    legend.position = "bottom"
-  ) +
-  xlab("Day of the Year")
-)
-
-ggsave(
-  filename = file.path(getwd(), "figs", "weatherstation_rain_smooth.pdf"),
-  prain.combined, 
-  width = 8.5, height = 2*8.5+2, units = "cm"
-)
+# # plot rain/precip --------------------------------------------------------
+# (prain.combined <- ggplot(
+#   data = raindat,
+#   aes(
+#     x = yDay,
+#     y = value,
+#     color = Year
+#   )
+# ) +
+#   theme_bw() +
+#   # geom_hline(yintercept = 1167.0) +
+#   # geom_point() +
+#   # geom_path() +
+#   geom_smooth(se = FALSE, method = "loess", size = 0.5) +
+#   facet_grid(Parameter ~ ., scales = "free_y") +
+#   coord_cartesian(xlim = c(0, 366)) +
+#   theme(
+#     axis.title.y = element_blank(),
+#     legend.position = "bottom"
+#   ) +
+#   xlab("Day of the Year")
+# )
+# 
+# # ggsave(
+# #   filename = file.path(getwd(), "figs", "weatherstation_rain_smooth.pdf"),
+# #   prain.combined,
+# #   width = 8.5, height = 2*8.5+2, units = "cm"
+# # )
 
 
 # temperature -------------------------------------------------------------
@@ -219,59 +220,117 @@ tempdat %>% group_by(Year) %>%
   summarise(yearly_mean = mean(value)) %>% 
   ungroup %>% as.data.frame()
 
-# (ptemp <- ggplot(
-#   data = tempdat, 
+# plot individually -------------------------------------------------------
+(ptemp <- ggplot(
+  data = tempdat,
+  aes(
+    x = yDay,
+    y = value,
+    color = Year
+  )
+) +
+  theme_bw() +
+  geom_smooth(se = FALSE, method = "loess", size = 0.5, show.legend = FALSE) +
+  # facet_grid(Parameter ~ ., scales = "free_y") +
+  coord_cartesian(xlim = c(0, 366)) +
+  # theme(
+  #   # axis.title.y = element_blank(),
+  #   legend.position = "bottom"
+  # ) +
+  xlab("Day of the Year") +
+  ylab("Temperature (deg C)")
+)
+
+(pcumrain <- ggplot(
+  data = raindat %>% filter(Parameter == quote(`Cumulative Precip (mm)`)), 
+  aes(
+    x = yDay,
+    y = value,
+    color = Year
+  )
+) +
+    theme_bw() +
+    geom_point(size = 0.75, alpha = 1) +
+    geom_path() +
+    # geom_smooth(se = FALSE, method = "loess", size = 0.5) +
+    # facet_grid(Parameter ~ ., scales = "free_y") +
+    coord_cartesian(xlim = c(0, 366)) +
+    # theme(
+    #   # axis.title.y = element_blank(),
+    #   legend.position = "bottom"
+    # ) +
+    xlab("Day of the Year") +
+    ylab("Cumulative Precip (mm)")
+)
+
+(pdailyrain <- ggplot(
+  data = raindat %>% filter(Parameter == quote(`Daily Precip (mm)`)), 
+  aes(
+    x = yDay,
+    y = value,
+    color = Year
+  )
+) +
+    theme_bw() +
+    # geom_point(alpha = 0.5) +
+    # geom_path() +
+    geom_smooth(se = FALSE, method = "loess", size = 0.5, show.legend = FALSE) +
+    # facet_grid(Parameter ~ ., scales = "free_y") +
+    coord_cartesian(xlim = c(0, 366)) +
+    # theme(
+    #   # axis.title.y = element_blank(),
+    #   legend.position = "bottom"
+    # ) +
+    xlab("Day of the Year") +
+    ylab("Daily Precip (mm)")
+)
+
+# join plots --------------------------------------------------------------
+ptemp +
+  pcumrain +
+  pdailyrain +
+  plot_layout(guides = "collect", ncol = 1) & 
+  theme(
+    legend.position = "bottom", 
+    legend.title = element_blank()
+  )
+
+ggsave(
+  filename = file.path(getwd(), "figs", "weatherstation.pdf"),
+  width = 8.5, height = 24, units = "cm"
+)
+
+# # merge rain and temperature datasets -------------------------------------
+# raindat
+# tempdat
+# 
+# rain.temp <- rbind(raindat, tempdat)
+# 
+# # plot both datasets ------------------------------------------------------
+# (p.rain.temp <- ggplot(
+#   data = rain.temp, 
 #   aes(
 #     x = yDay, 
 #     y = value, 
 #     color = Year
 #   )
 # ) +
-#     theme_bw() +
-#     
-#     geom_smooth(se = FALSE, method = "loess", size = 0.5) +
-#     # facet_grid(Parameter ~ ., scales = "free_y") +
-#     coord_cartesian(xlim = c(0, 366)) +
-#     theme(
-#       # axis.title.y = element_blank(),
-#       legend.position = "bottom"
-#     ) +
-#     xlab("Day of the Year") +
-#     ylab("Temperature (deg C)")
+#   theme_bw() +
+#   geom_smooth(se = FALSE, method = "loess", size = 0.5) +
+#   facet_grid(Parameter ~ ., scales = "free_y") +
+#   coord_cartesian(xlim = c(0, 366)) +
+#   theme(
+#     axis.title.y = element_blank(),
+#     legend.position = "bottom"
+#   ) +
+#   xlab("Day of the Year")
 # )
-
-
-# merge rain and temperature datasets -------------------------------------
-raindat
-tempdat
-
-rain.temp <- rbind(raindat, tempdat)
-
-# plot both datasets ------------------------------------------------------
-(p.rain.temp <- ggplot(
-  data = rain.temp, 
-  aes(
-    x = yDay, 
-    y = value, 
-    color = Year
-  )
-) +
-  theme_bw() +
-  geom_smooth(se = FALSE, method = "loess", size = 0.5) +
-  facet_grid(Parameter ~ ., scales = "free_y") +
-  coord_cartesian(xlim = c(0, 366)) +
-  theme(
-    axis.title.y = element_blank(),
-    legend.position = "bottom"
-  ) +
-  xlab("Day of the Year")
-)
-
-ggsave(
-  filename = file.path(getwd(), "figs", "weatherstation.pdf"),
-  p.rain.temp, 
-  width = 8.5, height = 24, units = "cm"
-)
+# 
+# ggsave(
+#   filename = file.path(getwd(), "figs", "weatherstation.pdf"),
+#   p.rain.temp, 
+#   width = 8.5, height = 24, units = "cm"
+# )
 
 
 # export precipitation summary --------------------------------------------
