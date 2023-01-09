@@ -172,6 +172,11 @@ raindat <- pivot_longer(
   values_to = "value"
 )
 
+raindat %>% filter(Parameter == quote(`Cumulative Precip (mm)`)) %>%
+  group_by(Year) %>% 
+  summarise(annual_total_rainfall = max(value)) %>% 
+  ungroup() %>% as.data.frame()
+
 # plot rain/precip --------------------------------------------------------
 (prain.combined <- ggplot(
   data = raindat, 
@@ -182,7 +187,10 @@ raindat <- pivot_longer(
   )
 ) +
   theme_bw() +
-  geom_smooth(se = FALSE, method = "loess", size = 0.5) +
+  geom_hline(yintercept = 1167.0) +
+  geom_point() +
+  geom_path() +
+  # geom_smooth(se = FALSE, method = "loess", size = 0.5) +
   facet_grid(Parameter ~ ., scales = "free_y") +
   coord_cartesian(xlim = c(0, 366)) +
   theme(
@@ -206,6 +214,10 @@ tempdat <- dat %>% filter(Parameter == "Temp") %>%
     Parameter = "Temperature (deg C)",
     value = mean(value)
   ) %>% ungroup()
+
+tempdat %>% group_by(Year) %>% 
+  summarise(yearly_mean = mean(value)) %>% 
+  ungroup %>% as.data.frame()
 
 # (ptemp <- ggplot(
 #   data = tempdat, 
@@ -262,11 +274,14 @@ ggsave(
 )
 
 
-
 # export precipitation summary --------------------------------------------
 write.csv(
   raindat, 
   file.path(getwd(), "output", "raindat.csv")
+)
+write.csv(
+  tempdat, 
+  file.path(getwd(), "output", "temperaturedat.csv")
 )
 
 # # Dew Point ---------------------------------------------------------------
