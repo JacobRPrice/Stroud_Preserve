@@ -131,6 +131,70 @@ colnames(emmlist[[1]])[4] <- colnames(emmlist[[2]])[4] <- colnames(emmlist[[3]])
 emmdf <- do.call("rbind", emmlist)
 emmdf$Parameter <- rep(names(modlist), each = 8)
 
+# estimated marginal means: year ------------------------------------------
+emmlist.Y <- lapply(
+  X = modlist, 
+  FUN = function(i) {
+    temm <- emmeans(object = i, specs = ~ Year, type = "response")
+    temm <- as.data.frame(temm)
+    return(temm)
+  }
+)
+emmlist.Y
+
+###
+# combine EMM results
+###
+which(
+  sapply(
+    lapply(emmlist.Y, colnames), FUN = function(i) {("response" %in% (i))}
+  ) == TRUE
+)
+
+colnames(emmlist.Y[[1]])[2] <- colnames(emmlist.Y[[2]])[2] <- colnames(emmlist.Y[[3]])[2] <- colnames(emmlist.Y[[8]])[2] <- colnames(emmlist.Y[[9]])[2] <- colnames(emmlist.Y[[10]])[2] <- "emmean"
+
+emmdf.Y <- do.call("rbind", emmlist.Y)
+emmdf.Y$Parameter <- rep(names(modlist), each = 2)
+
+emmdf.Y <- pivot_wider(
+  emmdf.Y, 
+  id_cols = c("Parameter"), 
+  names_from = "Year", 
+  values_from = c("emmean", "SE", "df", "lower.CL", "upper.CL")
+)
+
+# estimated marginal means: MS --------------------------------------------
+emmlist.MS <- lapply(
+  X = modlist, 
+  FUN = function(i) {
+    temm <- emmeans(object = i, specs = ~ Management_System, type = "response")
+    temm <- as.data.frame(temm)
+    return(temm)
+  }
+)
+emmlist.MS
+
+###
+# combine EMM results
+###
+which(
+  sapply(
+    lapply(emmlist.MS, colnames), FUN = function(i) {("response" %in% (i))}
+  ) == TRUE
+)
+
+colnames(emmlist.MS[[1]])[2] <- colnames(emmlist.MS[[2]])[2] <- colnames(emmlist.MS[[3]])[2] <- colnames(emmlist.MS[[8]])[2] <- colnames(emmlist.MS[[9]])[2] <- colnames(emmlist.MS[[10]])[2] <- "emmean"
+
+emmdf.MS <- do.call("rbind", emmlist.MS)
+emmdf.MS$Parameter <- rep(names(modlist), each = 2)
+
+emmdf.MS <- pivot_wider(
+  emmdf.MS, 
+  id_cols = c("Parameter"), 
+  names_from = "Management_System", 
+  values_from = c("emmean", "SE", "df", "lower.CL", "upper.CL")
+)
+
 # anova: CC ---------------------------------------------------------------
 ###
 # specify models 
@@ -214,14 +278,52 @@ colnames(emmlistcc[[1]])[3] <- colnames(emmlistcc[[2]])[3] <- colnames(emmlistcc
 emmdfcc <- do.call("rbind", emmlistcc)
 emmdfcc$Parameter <- rep(names(modlistcc), each = 4)
 
+# estimated marginal means: cc : year -------------------------------------
+emmlistcc.Y <- lapply(
+  X = modlistcc, 
+  FUN = function(i) {
+    temm <- emmeans(object = i, specs = ~ Year, type = "response")
+    temm <- as.data.frame(temm)
+    return(temm)
+  }
+)
+emmlistcc.Y
+
+###
+# combine EMM results
+###
+which(
+  sapply(
+    lapply(emmlistcc.Y, colnames), FUN = function(i) {("response" %in% (i))}
+  ) == TRUE
+)
+
+colnames(emmlistcc.Y[[1]])[2] <- colnames(emmlistcc.Y[[2]])[2] <- colnames(emmlistcc.Y[[3]])[2] <- colnames(emmlistcc.Y[[8]])[2] <- colnames(emmlistcc.Y[[9]])[2] <- colnames(emmlistcc.Y[[10]])[2] <- "emmean"
+
+emmdfcc.Y <- do.call("rbind", emmlistcc.Y)
+emmdfcc.Y$Parameter <- rep(names(modlist), each = 2)
+
+emmdfcc.Y <- pivot_wider(
+  emmdfcc.Y, 
+  id_cols = c("Parameter"), 
+  names_from = "Year", 
+  values_from = c("emmean", "SE", "df", "lower.CL", "upper.CL")
+)
+
+# estimated marginal means: cc: cc ----------------------------------------
+# This will not be performed. No significant impact from cover cropping. 
+
 # export output  ----------------------------------------------------------
 wb <- createWorkbook()
 
 addWorksheet(wb, sheet ="means")
 addWorksheet(wb, sheet ="anovadf")
 addWorksheet(wb, sheet ="emmdf")
+addWorksheet(wb, sheet ="emmdf_Y")
+addWorksheet(wb, sheet ="emmdf_MS")
 addWorksheet(wb, sheet = "anovadf_cc")
 addWorksheet(wb, sheet ="emmdf_cc")
+addWorksheet(wb, sheet ="emmdf_cc_Y")
 
 wb$sheet_names
 
@@ -251,6 +353,22 @@ writeData(
 
 writeData(
   wb, 
+  x = emmdf.Y,
+  sheet = "emmdf_Y", 
+  startCol = 1, startRow = 1, 
+  rowNames = TRUE, colNames = TRUE
+)
+
+writeData(
+  wb, 
+  x = emmdf.MS,
+  sheet = "emmdf_MS", 
+  startCol = 1, startRow = 1, 
+  rowNames = TRUE, colNames = TRUE
+)
+
+writeData(
+  wb, 
   x = anovadfcc,
   sheet = "anovadf_cc", 
   startCol = 1, startRow = 1, 
@@ -261,6 +379,14 @@ writeData(
   wb, 
   x = emmdfcc,
   sheet = "emmdf_cc", 
+  startCol = 1, startRow = 1, 
+  rowNames = TRUE, colNames = TRUE
+)
+
+writeData(
+  wb, 
+  x = emmdfcc.Y,
+  sheet = "emmdf_cc_Y", 
   startCol = 1, startRow = 1, 
   rowNames = TRUE, colNames = TRUE
 )
