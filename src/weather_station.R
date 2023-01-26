@@ -250,7 +250,7 @@ tempdat %>% group_by(Year) %>%
   )
 ) +
     theme_bw() +
-    geom_point(size = 0.75, alpha = 1) +
+    # geom_point(size = 0.75, alpha = 1) +
     geom_path() +
     # geom_smooth(se = FALSE, method = "loess", size = 0.5) +
     # facet_grid(Parameter ~ ., scales = "free_y") +
@@ -276,8 +276,8 @@ tempdat %>% group_by(Year) %>%
     # geom_vline(xintercept = 225) +
     # geom_vline(xintercept = 265) +
     # geom_point(alpha = 0.5) +
-    # geom_path() +
-    geom_smooth(se = FALSE, method = "loess", size = 0.5, show.legend = FALSE) +
+    geom_path(alpha = 0.75, show.legend = FALSE) +
+    # geom_smooth(se = FALSE, method = "loess", size = 0.5, show.legend = FALSE) +
     # facet_grid(Parameter ~ ., scales = "free_y") +
     coord_cartesian(xlim = c(0, 366)) +
     # theme(
@@ -285,7 +285,7 @@ tempdat %>% group_by(Year) %>%
     #   legend.position = "bottom"
     # ) +
     xlab("Day of the Year") +
-    ylab("Daily Precip (mm)")
+    ylab("Daily Precip (mm/day)") 
 )
 
 # join plots --------------------------------------------------------------
@@ -294,8 +294,7 @@ ptemp +
   pdailyrain +
   plot_layout(guides = "collect", ncol = 1) & 
   theme(
-    legend.position = "bottom", 
-    legend.title = element_blank()
+    legend.position = "bottom"
   )
 
 ggsave(

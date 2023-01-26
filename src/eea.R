@@ -41,14 +41,9 @@ dat <- readRDS(file.path(getwd(), "/data/", "dat.RDS"))
 
 # save plots --------------------------------------------------------------
 pNAGBG + pNAGAP +
-  plot_layout(guides = "collect", ncol = 1) &
-  theme(
-    legend.position = "bottom", 
-    legend.title = element_blank()
-  ) &
-  guides(color = guide_legend(nrow = 5, byrow = FALSE))
+  plot_layout(guides = "collect", ncol = 1)
 
 ggsave(
   filename = file.path(getwd(), "figs", "EEA_Ratio_Plots.pdf"),
-  width = 10, height = 2*8.5+2, units = "cm"
+  width = 6, height = 6, units = "in"
 )

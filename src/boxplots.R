@@ -202,14 +202,17 @@ ggplot(
   )
 ) +
   theme_bw() +
+  geom_point(position = position_jitterdodge(jitter.height = 0), alpha = 0.5) +
   geom_boxplot() +
-  geom_point(position = position_jitterdodge(jitter.height = 0)) +
   facet_wrap(Parameter~., scales = "free_y", ncol = 2, dir = "v") +
   theme(
     legend.position = "bottom", 
     axis.title.y = element_blank(), 
-    panel.grid.major.x = element_blank()
-  ) 
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    axis.text.x = element_text(size = 8)
+  ) +
+  xlab("Treatment Group")
 
 ggsave(
   filename = file.path(getwd(), "figs", "boxplot_MAIN.pdf"), 

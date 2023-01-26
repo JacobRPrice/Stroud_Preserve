@@ -216,6 +216,7 @@ datmain <- datmain %>% drop_na(value)
     axis.title.y = element_blank(), 
     panel.grid.major.x = element_blank(),
     panel.grid.minor.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
     legend.position = "bottom"
   ) +
   guides(color = guide_legend(nrow = 2, byrow = TRUE)) +
@@ -271,6 +272,7 @@ ggplot(
     axis.title.y = element_blank(), 
     panel.grid.major.x = element_blank(),
     panel.grid.minor.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
     legend.position = "bottom"
   )  +
   xlab("Day of the Year")
