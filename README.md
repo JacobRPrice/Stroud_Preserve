@@ -26,6 +26,20 @@ ANOVA --> Figures
 ANOVA --> Tables
 ```
 
+<!-- Syntax: -->
+
+<!-- https://mermaid.js.org/syntax/flowchart.html -->
+
+``` mermaid
+flowchart TD
+A[(Raw Min/Nit)] --> D{{Prepare_Data.R}}
+B[(Raw EEA)] --> D
+C[(Raw qPCR)] --> D
+D --> E[(dat.RDS)]
+E --> F{{Seasonality.R}} 
+F --> (Figure 3: Seasonality)
+```
+
 ## Description of scripts within this repository:
 
   - ./r/Prepare\_Data.R - imports the various raw data files in ./data/
