@@ -37,7 +37,7 @@ B[(Raw EEA)] --> D
 C[(Raw qPCR)] --> D
 D --> E[(dat.RDS)]
 E --> F{{Seasonality.R}} 
-F --> (Figure 3: Seasonality)
+F --> ("Figure 3: Seasonality")
 ```
 
 ## Description of scripts within this repository:
