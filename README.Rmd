@@ -18,30 +18,41 @@ knitr::opts_chunk$set(
 
 The goal of Stroud_Preserve is to ...
 
-## Process Flow Diagram
-<!-- Source for idea: -->
-<!-- https://twitter.com/diegohaz/status/1590043504428077056 -->
-```mermaid
-stateDiagram-v2
-[*] --> Raw_Data
-Raw_Data --> Processed_Data
-Processed_Data --> Temporal_Variation
-Temporal_Variation --> Figures
-Processed_Data --> ANOVA
-ANOVA --> Figures
-ANOVA --> Tables
-```
-
+## Process Flow Chart
 <!-- Syntax: -->
 <!-- https://mermaid.js.org/syntax/flowchart.html -->
+<!-- live editor: -->
+<!-- https://mermaid-js.github.io/mermaid-live-editor/ -->
 ```mermaid
-flowchart TD
-A[(Raw Min/Nit)] --> D{{Prepare_Data.R}}
-B[(Raw EEA)] --> D
-C[(Raw qPCR)] --> D
-D --> E[(dat.RDS)]
-E --> F{{Seasonality.R}} 
-F --> ("Figure 3: Seasonality")
+flowchart LR
+    A[(Raw Min/Nit)] --> D{{Prepare_Data.R}}
+    B[(Raw EEA)] --> D
+    C[(Raw qPCR)] --> D
+    D --> E[(dat.RDS)]
+    
+    E --> F{{Seasonality.R}} 
+    F --> G["Fig. 3: Seasonality"]
+    F --> H["Fig. S1: Sup. Seasonality"]
+    
+    E --> I{{boxplots.R}} --> J["Fig. 4: Boxplots"]
+
+    E --> K{{anova.R}}
+    K --> L["Table 3: ANOVA - MS & T "]
+    K --> M["Table 4: ANOVA - CC"]
+    K --> N["Table 5: Est Marg Means"]
+
+    E --> O{{weather_SMS.R}}
+    P[(Weather Station)] --> O 
+    Q[(Soil Moist. Sens.)] --> O
+    O --> R[(SMS_dat.RDS)]
+    O --> S[(raindat.csv)]
+    O --> T[(tempdat.csv)]
+
+    E --> U{{correlation.R}} 
+    R --> U
+    U --> V["Table S1: Cor Res"]
+
+    E --> W{{eea.R}} --> X["Fig. S2: EEA Ratiosa"]
 ```
 
 
