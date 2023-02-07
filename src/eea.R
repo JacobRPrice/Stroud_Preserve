@@ -6,7 +6,6 @@ library(patchwork)
 
 dat <- readRDS(file.path(getwd(), "/data/", "dat.RDS"))
 
-
 # generate plots ----------------------------------------------------------
 
 (pNAGBG <- ggplot(
@@ -39,11 +38,10 @@ dat <- readRDS(file.path(getwd(), "/data/", "dat.RDS"))
     geom_smooth(method = "lm", se = FALSE, size = 0.5)
 )
 
-# save plots --------------------------------------------------------------
 pNAGBG + pNAGAP +
   plot_layout(guides = "collect", ncol = 1)
 
-ggsave(
-  filename = file.path(getwd(), "figs", "EEA_Ratio_Plots.pdf"),
-  width = 6, height = 6, units = "in"
-)
+# ggsave(
+#   filename = file.path(getwd(), "figs", "EEA_Ratio_Plots.pdf"),
+#   width = 6, height = 6, units = "in"
+# )
