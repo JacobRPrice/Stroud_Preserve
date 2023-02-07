@@ -1,15 +1,32 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Stroud\_Preserve
+## Introduction
 
-<!-- badges: start -->
+This repository contains all of the scripts needed to replicate the
+results and output presented in:
 
-<!-- badges: end -->
+**Precipitation and soil moisture dominate N-cycling within fields
+transitioning from conventional to organic farming**  
+\- by -  
+[Jacob R. Price](https://jacobrprice.github.io/), [Diana
+Oviedo-Vargas](https://stroudcenter.org/people/oviedo-vargas/), [Marc
+Peipoch](https://stroudcenter.org/people/peipoch/), [Melinda D.
+Daniels](https://stroudcenter.org/people/daniels/), & [Jinjun
+Kan](https://stroudcenter.org/people/kan/)
 
-The goal of Stroud\_Preserve is to …
+This README will describe the contents of this repo and how to replicate
+our results.
+
+**Note(s):**
+
+  - These scripts were composed and executed on Mac machines; some
+    modification may be required for use with PC or Linux environments.
 
 ## Process Flow Chart
+
+*If you can’t see the chart make your browser wider and reload the
+page.*
 
 <!-- Syntax: -->
 
@@ -51,57 +68,11 @@ flowchart LR
     E --> W{{eea.R}} --> X["Fig. S2: EEA Ratiosa"]
 ```
 
-## Description of scripts within this repository:
+## Repository Contents
 
-  - ./r/Prepare\_Data.R - imports the various raw data files in ./data/
-    and prepares them for use with the remaining (analytical) scripts in
-    this repo  
-  - ./r/Sampling\_Table.R - creates a .csv file with the sample counts
-    by sampling date and analysis type  
-  - ./r/seasonality.R - generates figures illustrating how parameter
-    values … erm… vary over the course of the year
-  - ./r/boxplots.R - generates boxplots
-  - ./r/eea.R - creates eea ratio plots
-  - ./r/anova.R - carries out hypothesis tests
-  - ./r/weather\_station.R - produces visualizations and summary
-    statistics from weather station data
-
-## Reproducing the Results
-
-In order to reproduce our findings or view our approach…
-
-### ANOVA
-
-In order to generate our ANOVA results, execute the following line in
-the project’s root directory.
-
-``` bash
-bash ./src/anova_script.sh
-```
-
-What is special about using `README.Rmd` instead of just `README.md`?
-You can include R chunks like so:
-
-``` r
-summary(cars)
-#>      speed           dist       
-#>  Min.   : 4.0   Min.   :  2.00  
-#>  1st Qu.:12.0   1st Qu.: 26.00  
-#>  Median :15.0   Median : 36.00  
-#>  Mean   :15.4   Mean   : 42.98  
-#>  3rd Qu.:19.0   3rd Qu.: 56.00  
-#>  Max.   :25.0   Max.   :120.00
-```
-
-You’ll still need to render `README.Rmd` regularly, to keep `README.md`
-up-to-date. `devtools::build_readme()` is handy for this. You could also
-use GitHub Actions to re-render `README.Rmd` every time you push. An
-example workflow can be found here:
-<https://github.com/r-lib/actions/tree/master/examples>.
-
-You can also embed plots, for example:
-
-![](README_files/figure-gfm/pressure-1.png)<!-- -->
-
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub.
+  - ./ - the project home directory; where you’re located  
+  - ./README.Rmd & ./README.md - what you’re reading at the moment  
+  - ./data/ - contains all of the raw data needed to replicate our
+    analysis and processed data in case you just want to look at the
+    results themselves
+  - ./src/ - contains all of the (R) source files
