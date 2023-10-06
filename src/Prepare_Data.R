@@ -345,6 +345,10 @@ eea_wide <- eea %>% tidyr::pivot_wider(
   values_from = c(EEA_umol_hr_gdrysoil, EEA_umol_hr_gOM)
 )
 
+# qpcr_wide$Used_for_QPCR <- TRUE
+# soil_wide$Used_for_Soil <- TRUE
+# eea_wide$Used_for_EEA <- TRUE
+
 str(qpcr_wide)
 str(soil_wide)
 str(eea_wide)
@@ -371,6 +375,10 @@ dat <- left_join(
 )
 dat <- as_tibble(dat)
 
+# dat$Used_for_QPCR[which(is.na(dat$Used_for_QPCR))] <- FALSE
+# dat$Used_for_Soil[which(is.na(dat$Used_for_Soil))] <- FALSE
+# dat$Used_for_EEA[which(is.na(dat$Used_for_EEA))] <- FALSE
+
 # remove unneeded columns
 dat <- subset(
   dat, 
@@ -379,6 +387,33 @@ dat <- subset(
 
 # sort dataframe
 dat <- dat[order(dat$Date),]
+
+
+# obtain sample counts ----------------------------------------------------
+dattemp <- dat %>% tidyr::pivot_longer(
+  cols = names(dat)[-c(1:6)], 
+  names_to = "Parameter", 
+  values_to = "value"
+)
+
+
+# View(
+dattemp %>% group_by(Date, Parameter) %>% summarize(samplecount = sum(!is.na(value)))
+# )
+
+(samplecounts <- dattemp %>% 
+  group_by(Date, Parameter) %>% 
+  summarize(samplecount = sum(!is.na(value))) %>% 
+  tidyr::pivot_wider(
+    id_cols = c("Date"), 
+    names_from = c("Parameter"),
+    values_from = c("samplecount")
+))
+
+write.csv(
+  samplecounts,
+  file.path(getwd(), "output", "Sampling_Table.csv")
+)
 
 # Make nicer names --------------------------------------------------------
 str(dat)
@@ -460,13 +495,14 @@ names(dat)
 
 # save to disk ------------------------------------------------------------
 # as .csv
-write.csv(
-  x = dat,
-  file = file.path(getwd(), "data", "dat.csv"),
-  row.names = FALSE
-)
+# write.csv(
+#   x = dat,
+#   file = file.path(getwd(), "data", "dat.csv"),
+#   row.names = FALSE
+# )
+
 # as RDS
-saveRDS(
-  object = dat,
-  file = file.path(getwd(), "/data/", "dat.RDS")
-)
+# saveRDS(
+#   object = dat,
+#   file = file.path(getwd(), "/data/", "dat.RDS")
+# )
