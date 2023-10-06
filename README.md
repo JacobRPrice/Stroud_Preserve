@@ -7,8 +7,8 @@ This repository contains all of the scripts needed to replicate the
 results and output presented in:
 
 **Precipitation and soil moisture dominate N-cycling within fields
-transitioning from conventional to organic farming**  
-- by -  
+transitioning from conventional to organic farming**
+
 [Jacob R. Price](https://jacobrprice.github.io/), [Diana
 Oviedo-Vargas](https://stroudcenter.org/people/oviedo-vargas/), [Marc
 Peipoch](https://stroudcenter.org/people/peipoch/), [Melinda D.
@@ -58,6 +58,7 @@ flowchart LR
     O --> R[(SMS_dat.RDS)]
     O --> S[(raindat.csv)]
     O --> T[(tempdat.csv)]
+    O --> Z[Fig. 2: Weather & SMS]
 
     E --> U{{correlation.R}} 
     R --> U
