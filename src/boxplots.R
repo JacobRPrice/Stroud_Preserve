@@ -63,25 +63,6 @@ ggplot(
     Parameter~., scales = "free_y", ncol = 2, dir = "v", 
     labeller = as_labeller(
       c(
-        # Net_Nitrification = bquote("Net Nit [mg N kg^-1 d^-1]")
-        # Net_Nitrification = expression(paste("Net Nit mg N", kg^-1))
-        # Net_Nitrification = Net~Nit~mg~N~kg^1
-        # Net_Nitrification = "Net Nit mg N (kg^(-1))"
-        # Net_Nitrification = expression("Net Nit mg N " ~ hr^-1)
-        
-        # Net_Nitrification = "Net Nitrification [mg N kg^-1 d^-1]",
-        # Soil_NH4N = "Soil NH4-N [mg N kg^-1]", 
-        # Net_Mineralization = "Net Mineralization [mg N kg^-1 d^-1]",
-        # Soil_NO3N = "Soil NO3-N [mg N kg^-1]", 
-        # "log(AOA)" = "AOA [Log10(copy number g^-1)]",
-        # "log(AOB)" = "AOB [Log10(copy number g^-1)]",
-        # "log(nosZ)" = "nosZ [Log10(copy number g^-1)]",
-        # "ln(BG)" = "BG [ln(µmol gOM^-1 hr^-1)]",
-        # "ln(NAG)" = "NAG [ln(µmol gOM^-1 hr^-1)]",
-        # "ln(AP)" = "AP [ln(µmol gOM^-1 hr^-1)]",
-        # "NAG:BG" = "NAG:BG", 
-        # "NAG:AP" = "NAG:AP"
-        
         Net_Nitrification = "Net Nitrification",
         Soil_NH4N = "Soil NH4-N", 
         Net_Mineralization = "Net Mineralization",
