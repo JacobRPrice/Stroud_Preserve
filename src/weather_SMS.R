@@ -347,11 +347,11 @@ tempdat %>% group_by(Year) %>%
 ) +
   theme_bw() +
   geom_smooth(
-    se = FALSE, method = "loess", size = 0.5, show.legend = FALSE
+    se = FALSE, method = "loess", linewidth = 0.5, show.legend = FALSE
   ) +
   coord_cartesian(xlim = c(0, 366)) +
   xlab("Day of the Year") +
-  ylab("Temperature (deg C)")
+  ylab("Temperature [deg C]")
 )
 
 
@@ -369,7 +369,7 @@ tempdat %>% group_by(Year) %>%
     geom_path(show.legend = FALSE) +
     coord_cartesian(xlim = c(0, 366)) +
     xlab("Day of the Year") +
-    ylab("Cumulative Precip (mm)")
+    ylab("Cumulative Precip [mm]")
 )
 
 ###
@@ -460,14 +460,15 @@ translate <- 250
     scale_y_reverse(
       sec.axis = sec_axis(
         ~ trans$inverse((.x - translate) / scale), 
-        "Soil Moisture (%)", 
+        "Soil Moisture [%]", 
         breaks = seq(0, 100, 25)
       )
     ) +
     scale_x_date(
       date_labels = "%b/%y", 
       minor_breaks = "1 month"
-    )
+    ) +
+    ylab("Daily Precip [mm]")
 )
 
 (ptemp + pcumprecip) / p.precip.moisture &
@@ -476,6 +477,7 @@ translate <- 250
   )
 
 # ggsave(
-#   filename = file.path(getwd(), "figs", "Weather_&_SoilMoisture.pdf"),
+##   filename = file.path(getwd(), "figs", "Weather_&_SoilMoisture.pdf"),
+#   filename = file.path(getwd(), "figs", "Figure_2.pdf"),
 #   width = 18, height = 18, units = "cm"
 # )
