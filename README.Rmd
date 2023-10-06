@@ -39,10 +39,11 @@ flowchart LR
     B[(Raw EEA)] --> D
     C[(Raw qPCR)] --> D
     D --> E[(dat.RDS)]
+    D --> Y[Table S1: Sample Counts]
     
     E --> F{{Seasonality.R}} 
     F --> G["Fig. 3: Seasonality"]
-    F --> H["Fig. S1: Sup. Seasonality"]
+    F --> H["Fig. S2: Sup. Seasonality"]
     
     E --> I{{boxplots.R}} --> J["Fig. 4: Boxplots"]
 
@@ -60,12 +61,12 @@ flowchart LR
 
     E --> U{{correlation.R}} 
     R --> U
-    U --> V["Table S1: Cor Res"]
+    U --> V["Table S2: Cor Res"]
 
-    E --> W{{eea.R}} --> X["Fig. S2: EEA Ratiosa"]
+    E --> W{{eea.R}} --> X["Fig. S3: EEA Ratios"]
 ```
 ## Repository Contents
-* ./ - the project home directory; where you're located  
+* ./ - the project home directory; where you're currently located :-)   
 * ./README.Rmd & ./README.md - what you're reading at the moment  
-* ./data/ - contains all of the raw data needed to replicate our analysis and processed data in case you just want to look at the results themselves 
-* ./src/ - contains all of the (R) source files 
+* ./data/ - contains all of the raw data needed to replicate our analysis and processed data in case you just want to look at the results themselves  
+* ./src/ - contains all of the (R) source files  
