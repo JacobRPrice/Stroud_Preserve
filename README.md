@@ -6,8 +6,8 @@
 This repository contains all of the scripts needed to replicate the
 results and output presented in:
 
-**Precipitation and soil moisture dominate N-cycling within fields
-transitioning from conventional to organic farming**
+**Precipitation and soil moisture drive N-cycling during early
+transition from conventional to organic farming**
 
 [Jacob R. Price](https://jacobrprice.github.io/), [Diana
 Oviedo-Vargas](https://stroudcenter.org/people/oviedo-vargas/), [Marc
