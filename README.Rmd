@@ -11,15 +11,13 @@ knitr::opts_chunk$set(
 )
 ```
 
+# Reduction in nitrification during the early transition from conventional to organic farming practices
+
 ## Introduction
 
 This repository contains all of the scripts needed to replicate the results and output presented in: 
 
-**Precipitation and soil moisture drive N-cycling during early transition from conventional to organic farming**  
-
-[Jacob R. Price](https://jacobrprice.github.io/), [Diana Oviedo-Vargas](https://stroudcenter.org/people/oviedo-vargas/), [Marc Peipoch](https://stroudcenter.org/people/peipoch/), [Melinda D. Daniels](https://stroudcenter.org/people/daniels/), & [Jinjun Kan](https://stroudcenter.org/people/kan/)  
-
-This README will describe the contents of this repo and how to replicate our results. 
+[Jacob R. Price](https://jacobrprice.github.io/), [Diana Oviedo-Vargas](https://stroudcenter.org/people/oviedo-vargas/), [Marc Peipoch](https://stroudcenter.org/people/peipoch/), [Melinda D. Daniels](https://stroudcenter.org/people/daniels/), & [Jinjun Kan](https://stroudcenter.org/people/kan/). 2025. Reduction in nitrification during the early transition from conventional to organic farming practices. Ecosphere. (DOI forthcoming)
 
 **Note(s):**   
 
